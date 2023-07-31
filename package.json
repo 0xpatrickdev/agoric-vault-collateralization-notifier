@@ -1,0 +1,38 @@
+{
+  "name": "agoric-vault-collateralization-notifier",
+  "version": "0.1.0",
+  "description": "email notifications for vault collateralization levels",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "ava 'test/**/test-*.js' --serial ",
+    "test:watch": "ava 'test/**/test-*.js' -w --serial"
+  },
+  "author": "0xPatrick <patrick@0xpatrick.dev> (https://0xpatrick.dev)",
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/jwt": "^7.2.0",
+    "@sendgrid/mail": "^7.7.0",
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.21.0",
+    "fastify-plugin": "^4.5.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "ava": "^5.3.1",
+    "sinon": "^15.2.0"
+  },
+  "ava": {
+    "files": [
+      "test/**/*"
+    ],
+    "ignoredByWatcher": [
+      "node_modules/**",
+      "coverage/**",
+      "database/**",
+      "**/*.sqlite"
+    ]
+  }
+}
