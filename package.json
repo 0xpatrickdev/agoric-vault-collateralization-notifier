@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "test": "ava 'test/**/test-*.js' --serial ",
+    "test": "c8 ava 'test/**/test-*.js' --serial ",
     "test:watch": "ava 'test/**/test-*.js' -w --serial"
   },
   "author": "0xPatrick <patrick@0xpatrick.dev> (https://0xpatrick.dev)",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "ava": "^5.3.1",
+    "c8": "^8.0.1",
     "sinon": "^15.2.0"
   },
   "ava": {
