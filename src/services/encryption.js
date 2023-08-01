@@ -13,18 +13,18 @@ export function generateToken(bytes = 32) {
 
 /**
  * @param {string} string string to be hashed
- * @returns {string} hashed token
+ * @returns {Promise<string>} hashed token
  */
-export function hashToken(string) {
-  return bcrypt.hashSync(string, SALT_ROUNDS);
+export async function hashToken(string) {
+  return bcrypt.hash(string, SALT_ROUNDS);
 }
 
 /**
  * @param {string} plainText plain text token
  * @param {string} hash hashed token
- * @returns {boolean} true if token is valid
+ * @returns {Promise<boolean>} true if token is valid
  */
 
-export function verifyToken(plainText, hash) {
-  return bcrypt.compareSync(plainText, hash);
+export async function verifyToken(plainText, hash) {
+  return bcrypt.compare(plainText, hash);
 }
