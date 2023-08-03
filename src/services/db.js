@@ -37,7 +37,7 @@ export const setupDb = async () => {
         email TEXT UNIQUE,
         token TEXT,
         tokenExpiry INTEGER,
-        verified INTEGER
+        verified INTEGER CHECK(verified IN (0, 1))
       );
     `);
     db.run(`
@@ -48,6 +48,36 @@ export const setupDb = async () => {
         vaultId INTEGER,
         collateralizationRatio REAL,
         FOREIGN KEY(userId) REFERENCES Users(id)
+      );
+    `);
+    db.run(`
+      CREATE TABLE IF NOT EXISTS Brands (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        issuerName TEXT UNIQUE,
+        assetKind TEXT CHECK(assetKind IN ('nat', 'set', 'copy_set', 'copy_bag')),
+        decimalPlaces INTEGER
+      );
+    `);
+    db.run(`
+      CREATE TABLE IF NOT EXISTS VaultManagerQuotes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vaultManagerId INTEGER UNIQUE,
+        quoteAmountIn REAL,
+        quoteAmountOut REAL,
+        quoteBrandIn INTEGER,
+        quoteBrandOut INTEGER,
+        timestamp INTEGER,
+        FOREIGN KEY(quoteBrandIn) REFERENCES Brands(id),
+        FOREIGN KEY(quoteBrandOut) REFERENCES Brands(id)
+      );
+    `);
+    db.run(`
+      CREATE TABLE IF NOT EXISTS FollowerNotifierMapping (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        followerId INTEGER,
+        notifierId INTEGER,
+        FOREIGN KEY(followerId) REFERENCES VaultManagerQuotes(id),
+        FOREIGN KEY(notifierId) REFERENCES Notifier(id)
       );
     `);
   });
@@ -174,12 +204,30 @@ export async function createNotifier(notifier) {
 }
 
 /**
+ * checks if user owns Notifier then deletes it
  * @param {string} notifierId id of notifier to delete
  * @param {string} userId user's id
  * @returns {Promise<unknown|Error>} user
  */
-export async function deleteNotifer(notiferId, userId) {
-  return new Promise((resolve, reject) => {});
+export async function deleteNotifier(notifierId, userId) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      "SELECT * FROM Notifier WHERE id = ? AND userId = ?",
+      [notifierId, userId],
+      (err, row) => {
+        if (err) return reject(err);
+        if (!row) return reject(new Error("Notifier not found"));
+        db.run(
+          "DELETE FROM Notifier WHERE id = ? AND userId = ?",
+          [notifierId, userId],
+          (err) => {
+            if (err) return reject(err);
+            resolve(`Notifier with id: ${notifierId} was deleted.`);
+          }
+        );
+      }
+    );
+  });
 }
 
 /**
@@ -194,3 +242,70 @@ export async function getAllUsers() {
     });
   });
 }
+
+/**
+ * list of all notifiers (testing only?)
+ * @returns {Promise<Array<import('../types').Notifier>} Array of notifiers
+ */
+export async function getNotifiers() {
+  return new Promise((resolve, reject) => {
+    db.all("SELECT * FROM Notifier", (err, rows) => {
+      if (err) return reject(err);
+      resolve(rows);
+    });
+  });
+}
+
+/**
+ * list of unique vaultManagerIds (collateralTypes)
+ * @returns {Promise<Array<import('../types').Notifier>} Array of unique vaultManagerIds
+ */
+export async function getUniqueVaultManagerIds() {
+  return new Promise((resolve, reject) => {
+    db.all("SELECT DISTINCT vaultManagerId FROM Notifier", (err, rows) => {
+      if (err) return reject(err);
+      resolve(rows.map((row) => row.vaultManagerId));
+    });
+  });
+}
+
+/**
+ * list of unique vaultIds
+ * @returns {Promise<Array<import('../types').Notifier>} Array of unique pairs of vaultManagerId and vaultId
+ */
+export async function getUniqueVaultManagerAndVaultIds() {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT DISTINCT vaultManagerId, vaultId FROM Notifier",
+      (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows.map((row) => [row.vaultManagerId, row.vaultId]));
+      }
+    );
+  });
+}
+
+/**
+ * finds all notifiers for a vaultId-vaultManagerId pair below a certain collateralization ratio
+ * @param {number} collateralizationRatio collateralization ratio
+ * @param {number} vaultId vault's id
+ * @param {number} vaultManagerId vault manager's id
+ * @returns {Promise<Array<import('../types').Notifier>>} Notifiers that meet the criteria
+ */
+export async function getNotifiersByThreshold(
+  collateralizationRatio,
+  vaultId,
+  vaultManagerId
+) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT * FROM Notifier WHERE collateralizationRatio <= ? AND vaultId = ? AND vaultManagerId = ?",
+      [collateralizationRatio, vaultId, vaultManagerId],
+      (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      }
+    );
+  });
+}
+

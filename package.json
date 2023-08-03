@@ -12,6 +12,11 @@
   "author": "0xPatrick <patrick@0xpatrick.dev> (https://0xpatrick.dev)",
   "license": "MIT",
   "dependencies": {
+    "@agoric/casting": "^0.4.2",
+    "@agoric/cosmic-proto": "^0.3.0",
+    "@cosmjs/stargate": "^0.31.0",
+    "@cosmjs/tendermint-rpc": "^0.31.0",
+    "@endo/init": "^0.5.57",
     "@fastify/jwt": "^7.2.0",
     "@sendgrid/mail": "^7.7.0",
     "bcrypt": "^5.1.0",
