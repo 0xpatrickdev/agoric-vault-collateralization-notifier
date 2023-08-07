@@ -209,7 +209,7 @@ export async function createNotifier(notifier) {
  * @param {string} userId user's id
  * @returns {Promise<unknown|Error>} user
  */
-export async function deleteNotifier(notifierId, userId) {
+export async function deleteNotifier({ notifierId, userId }) {
   return new Promise((resolve, reject) => {
     db.get(
       "SELECT * FROM Notifier WHERE id = ? AND userId = ?",
@@ -253,6 +253,20 @@ export async function getNotifiers() {
       if (err) return reject(err);
       resolve(rows);
     });
+  });
+}
+
+/**
+ * list of all notifiers for a user
+ * @returns {Promise<Array<import('../types').Notifier>} Array of notifiers
+ */
+export async function getNotifiersByUser(userId) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT * FROM Notifier WHERE userId = ?",
+      userId,
+      (err, rows) => err ? reject(err) : resolve(rows)
+    );
   });
 }
 

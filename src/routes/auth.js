@@ -10,6 +10,7 @@ import { THIRTY_MINUTES_IN_MS } from "../utils/constants.js";
 
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "30d";
 
+/** @returns {import('fastify').FastifyPluginCallback} */
 export const auth = (fastify, _, done) => {
   // Route to create a new user
   fastify.post("/register", async (request, reply) => {

@@ -7,7 +7,7 @@ import { initDb, resetDb, setupDb, teardownDb } from "../src/services/db.js";
 test.beforeEach(async (t) => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
   resetDb();
-  t.context.app = await makeApp({ logger: false });
+  t.context.app = makeApp({ logger: false });
   t.context.db = await setupDb(initDb());
 });
 

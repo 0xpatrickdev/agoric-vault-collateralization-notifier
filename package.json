@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node --no-experimental-fetch src/server.js",
     "test": "c8 ava 'test/**/test-*.js' --serial ",
     "test:watch": "ava 'test/**/test-*.js' -w --serial"
   },
@@ -18,7 +18,7 @@
     "@cosmjs/tendermint-rpc": "^0.31.0",
     "@endo/init": "^0.5.57",
     "@fastify/jwt": "^7.2.0",
-    "@sendgrid/mail": "^7.7.0",
+    "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
     "dotenv": "^16.3.1",
     "fastify": "^4.21.0",
@@ -31,8 +31,11 @@
     "sinon": "^15.2.0"
   },
   "ava": {
+    "nodeArguments": [
+      "--no-experimental-fetch"
+    ],
     "files": [
-      "test/**/*"
+      "test/**/test-*.js"
     ],
     "ignoredByWatcher": [
       "node_modules/**",

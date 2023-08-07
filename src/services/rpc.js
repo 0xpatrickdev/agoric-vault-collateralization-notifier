@@ -1,4 +1,5 @@
 // First, obtain a Hardened JS environment via Endo.
+import axios from "axios";
 import "@endo/init/pre-remoting.js"; // needed only for the next line
 import "@agoric/casting/node-fetch-shim.js"; // needed for Node.js
 import "@endo/init";
@@ -42,7 +43,7 @@ export const makeVbankAssetFollower = () =>
   makeVstorageFollower(makeVbankAssetPath());
 
 export const getRpcAddress = async () => {
-  const response = await fetch(getEnvVar("NETWORK_CONFIG_URL"), {
+  const response = await axios.get(getEnvVar("NETWORK_CONFIG_URL"), {
     headers: { accept: "application/json" },
   });
   const networkConfig = await response.json();

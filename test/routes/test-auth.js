@@ -2,20 +2,27 @@ import test from "ava";
 import dotenv from "dotenv";
 import path from "path";
 import sinon from "sinon";
-import sgMail from "@sendgrid/mail";
+import axios from "axios";
 import { makeApp } from "../../src/app.js";
 import { initDb, resetDb, setupDb, teardownDb } from "../../src/services/db.js";
 
 test.beforeEach(async (t) => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
-  t.context.sgSendStub = sinon.stub(sgMail, "send");
+  const resp = Promise.resolve({
+    status: 200,
+    ok: true,
+    json: () => Promise.resolve({ data: "Mocked data" }),
+  });
+  t.context.postStub = sinon.stub(axios, "post").resolves(resp);
+  t.context.getStub = sinon.stub(axios, "get").resolves(resp);
   resetDb();
-  t.context.app = await makeApp();
+  t.context.app = makeApp();
   t.context.db = await setupDb(initDb());
 });
 
 test.afterEach.always(async (t) => {
-  t.context.sgSendStub.restore();
+  t.context.postStub.restore();
+  t.context.getStub.restore();
   if (t.context.db) {
     await teardownDb();
     t.context.db = null;
@@ -48,7 +55,7 @@ test("register returns 200 when valid email is provided", async (t) => {
   });
 });
 
-test("verify returns 200 with a valid access token", async (t) => {
+test.only("verify returns 200 with a valid access token", async (t) => {
   const body = { email: "john@doe.com" };
   const registerResponse = await t.context.app.inject({
     method: "POST",
@@ -56,17 +63,17 @@ test("verify returns 200 with a valid access token", async (t) => {
     body,
   });
   t.is(registerResponse.statusCode, 200);
-  t.true(t.context.sgSendStub.calledOnce, "stubbed sgMail.send() is called");
+  t.true(t.context.postStub.calledOnce, "stubbed fetch is called");
 
-  // Get the arguments of the first call to sgMail.send()
-  const sgSendStubArgs = t.context.sgSendStub.getCall(0).args[0];
+  const fetchStubArgs = t.context.postStub.getCall(0).args[1].body;
 
-  t.is(sgSendStubArgs.from, process.env.SENDGRID_FROM_EMAIL);
-  t.is(sgSendStubArgs.subject, "Inter Vault Alterts: Email Verification");
-  t.is(sgSendStubArgs.to, body.email);
+  t.is(fetchStubArgs.get("from"), process.env.EMAIL_FROM);
+  t.is(fetchStubArgs.get("subject"), "Inter Vault Alerts: Email Verification");
+  t.is(fetchStubArgs.get("to"), body.email);
 
   // extract access token from the email body
-  const accessToken = sgSendStubArgs.text
+  const accessToken = fetchStubArgs
+    .get("text")
     .split("verify?token=")[1]
     .split(".")[0];
 

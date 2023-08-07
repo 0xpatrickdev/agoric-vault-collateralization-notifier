@@ -24,7 +24,8 @@
  * @property {string} JWT_EXPIRY 1h, 1d, 30d, 1y, etc
  * @property {string} JWT_SECRET
  * @property {number} PORT http port for the fastify server
- * @property {string} SENDGRID_API_KEY
- * @property {string} SENDGRID_FROM_EMAIL sender email
- * @property {string} SENDGRID_CALLBACK_URL web url to append access token in email
+ * @property {string} EMAIL_API_KEY
+ * @property {string} EMAIL_FROM sender email
+ * @property {string} EMAIL_CALLBACK_URL web url to append access token in email
+ * @property {string} EMAIL_DOMAIN sending email domain (mailgun param)
  */

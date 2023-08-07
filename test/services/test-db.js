@@ -18,7 +18,7 @@ import { FIVE_SECONDS_IN_MS } from "../../src/utils/constants.js";
 test.beforeEach(async (t) => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
   resetDb();
-  t.context.app = await makeApp();
+  t.context.app = makeApp();
   t.context.db = await setupDb(initDb());
 });
 

@@ -8,6 +8,11 @@ import { getEnvVar } from "./utils/getEnvVar.js";
 
 dotenv.config();
 
+/**
+ * Creates and configures a Fastify server application.
+ * @param {import('fastify').FastifyServerOptions} [opts={}]
+ * @returns {import('fastify').FastifyInstance}
+ */
 export const makeApp = (opts = {}) => {
   const app = fastify(opts);
 
