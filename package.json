@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node --no-experimental-fetch src/server.js",
+    "start": "node src/server.js",
     "test": "c8 ava 'test/**/test-*.js' --serial ",
     "test:watch": "ava 'test/**/test-*.js' -w --serial"
   },
@@ -14,9 +14,11 @@
   "dependencies": {
     "@agoric/casting": "^0.4.2",
     "@agoric/cosmic-proto": "^0.3.0",
+    "@agoric/smart-wallet": "^0.5.3",
     "@cosmjs/stargate": "^0.31.0",
     "@cosmjs/tendermint-rpc": "^0.31.0",
     "@endo/init": "^0.5.57",
+    "@endo/marshal": "^0.8.8",
     "@fastify/jwt": "^7.2.0",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
@@ -31,9 +33,7 @@
     "sinon": "^15.2.0"
   },
   "ava": {
-    "nodeArguments": [
-      "--no-experimental-fetch"
-    ],
+    "nodeArguments": [],
     "files": [
       "test/**/test-*.js"
     ],

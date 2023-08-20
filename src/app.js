@@ -1,3 +1,4 @@
+import "./installSesLockdown.js";
 import dotenv from "dotenv";
 import fastify from "fastify";
 import { jwtPlugin } from "./plugins/jwt.js";
