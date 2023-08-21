@@ -4,7 +4,13 @@ import path from "path";
 import sinon from "sinon";
 import axios from "axios";
 import { makeApp } from "../../src/app.js";
-import { initDb, resetDb, setupDb, teardownDb } from "../../src/services/db.js";
+import {
+  initDb,
+  resetDb,
+  setupDb,
+  teardownDb,
+} from "../../src/services/db/index.js";
+import { initVstorageWatcher } from "../../src/vstorageWatcher.js";
 
 test.beforeEach(async (t) => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
@@ -18,6 +24,7 @@ test.beforeEach(async (t) => {
   resetDb();
   t.context.app = makeApp();
   t.context.db = await setupDb(initDb());
+  t.context.vstorage = await initVstorageWatcher();
 
   // register a user
   const body = { email: "john@doe.com" };
@@ -51,6 +58,7 @@ test.afterEach.always(async (t) => {
     await teardownDb();
     t.context.db = null;
   }
+  t.context.vstorage = null;
 });
 
 test("user can create notifiers", async (t) => {
@@ -134,12 +142,6 @@ test("user can retrieve their own notifiers", async (t) => {
   t.is(response.statusCode, 200);
   t.like(await response.json(), [
     {
-      collateralizationRatio: 230,
-      userId: 1,
-      vaultId: 20,
-      vaultManagerId: 0,
-    },
-    {
       collateralizationRatio: 240,
       userId: 1,
       vaultId: 20,
@@ -147,6 +149,12 @@ test("user can retrieve their own notifiers", async (t) => {
     },
     {
       collateralizationRatio: 250,
+      userId: 1,
+      vaultId: 20,
+      vaultManagerId: 0,
+    },
+    {
+      collateralizationRatio: 230,
       userId: 1,
       vaultId: 20,
       vaultManagerId: 0,

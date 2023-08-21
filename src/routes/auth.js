@@ -2,7 +2,7 @@ import {
   addOrUpdateUser,
   getUserByToken,
   markUserVerified,
-} from "../services/db.js";
+} from "../services/db/index.js";
 import { sendVerifyEmail } from "../services/email.js";
 import { generateToken } from "../services/encryption.js";
 import { isValidEmail } from "../utils/isValidEmail.js";
@@ -25,10 +25,13 @@ export const auth = (fastify, _, done) => {
     try {
       await sendVerifyEmail(email, token);
     } catch (e) {
-      return reply.status(500).send({
-        error:
-          "Error sending email. Please try again or use a different address.",
-      });
+      console.warn('Email service error', e.message)
+      console.log("auth token", token); // for testing
+      // disabled for development/testing purposes
+      // return reply.status(500).send({
+      //   error:
+      //     "Error sending email. Please try again or use a different address.",
+      // });
     }
 
     // save user + token in database

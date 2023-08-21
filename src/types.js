@@ -13,7 +13,34 @@
  * @property {number} userId - The ID of the user that this notifier belongs to. This is a foreign key reference to the `id` field in the `Users` table.
  * @property {number} vaultManagerId - The ID of the vaultManager (collateralType) that this notifier is related to.
  * @property {number} vaultId - The ID of the vault that this notifier is related to.
- * @property {number} collateralizationRatio - The collateralization ratio for this notifier, normalized as a float.
+ * @property {number} collateralizationRatio - The collateralization ratio for this notifier.
+ */
+
+/**
+ * @typedef {Object} Brand
+ * @property {string} isserName
+ * @property {'nat'|'set'|'copy_set'|'copy_bag'} assetKind
+ * @property {number} decimalPlaces
+ */
+
+/**
+ * @typedef {Object} Quote
+ * @property {number} vaultManagerId - The ID of the vaultManager (collateralType) that this notifier is related to.
+ * @property {number} quoteAmountIn
+ * @property {number} quoteAmountOut
+ * @property {string} inIssuerName
+ * @property {string} outIssuerName
+ * @property {number} latestTimestamp
+ */
+
+
+/**
+ * @typedef {Object} Vault
+ * @property {number} vaultManagerId - The ID of the vaultManager (collateralType) that this notifier is related to.
+ * @property {number} vaultId - The ID of the vault that this notifier is related to.
+ * @property {number} locked - Qty of locked collatearl
+ * @property {number} debt - Qty of debt owed
+ * @property {'active'|'liquidating'|'liquidated'|'closed'} state 
  */
 
 /**
@@ -28,4 +55,10 @@
  * @property {string} EMAIL_FROM sender email
  * @property {string} EMAIL_CALLBACK_URL web url to append access token in email
  * @property {string} EMAIL_DOMAIN sending email domain (mailgun param)
+ */
+
+/**
+ * @typedef {Object} AgoricChainStoragePathKind
+ * @property {string} Children 
+ * @property {string} Data
  */

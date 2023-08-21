@@ -12,7 +12,7 @@ import {
   getUserByToken,
   markUserVerified,
   getUserById,
-} from "../../src/services/db.js";
+} from "../../src/services/db/index.js";
 import { FIVE_SECONDS_IN_MS } from "../../src/utils/constants.js";
 
 test.beforeEach(async (t) => {

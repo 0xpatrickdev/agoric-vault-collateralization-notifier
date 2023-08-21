@@ -4,7 +4,13 @@ import path from "path";
 import sinon from "sinon";
 import axios from "axios";
 import { makeApp } from "../../src/app.js";
-import { initDb, resetDb, setupDb, teardownDb } from "../../src/services/db.js";
+import {
+  initDb,
+  resetDb,
+  setupDb,
+  teardownDb,
+} from "../../src/services/db/index.js";
+import { initVstorageWatcher } from "../../src/vstorageWatcher.js";
 
 test.beforeEach(async (t) => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
@@ -18,6 +24,7 @@ test.beforeEach(async (t) => {
   resetDb();
   t.context.app = makeApp();
   t.context.db = await setupDb(initDb());
+  t.context.vstorage = await initVstorageWatcher();
 });
 
 test.afterEach.always(async (t) => {
@@ -26,6 +33,7 @@ test.afterEach.always(async (t) => {
   if (t.context.db) {
     await teardownDb();
     t.context.db = null;
+    t.context.vstorage = null;
   }
 });
 
