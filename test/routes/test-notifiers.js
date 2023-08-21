@@ -45,7 +45,6 @@ test.beforeEach(async (t) => {
     },
   });
   if (!verifyResponse.headers.authorization.includes("Bearer ")) {
-    console.log("REACHED");
     throw new Error("Error getting jwt token.");
   }
   t.context.headers = { authorization: verifyResponse.headers.authorization };
@@ -142,6 +141,12 @@ test("user can retrieve their own notifiers", async (t) => {
   t.is(response.statusCode, 200);
   t.like(await response.json(), [
     {
+      collateralizationRatio: 230,
+      userId: 1,
+      vaultId: 20,
+      vaultManagerId: 0,
+    },
+    {
       collateralizationRatio: 240,
       userId: 1,
       vaultId: 20,
@@ -149,12 +154,6 @@ test("user can retrieve their own notifiers", async (t) => {
     },
     {
       collateralizationRatio: 250,
-      userId: 1,
-      vaultId: 20,
-      vaultManagerId: 0,
-    },
-    {
-      collateralizationRatio: 230,
       userId: 1,
       vaultId: 20,
       vaultManagerId: 0,

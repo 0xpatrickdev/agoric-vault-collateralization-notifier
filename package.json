@@ -43,5 +43,11 @@
       "database/**",
       "**/*.sqlite"
     ]
+  },
+  "c8": {
+    "exclude": [
+      "src/lib/*.js",
+      "test/**/*.js"
+    ]
   }
 }

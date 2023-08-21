@@ -56,26 +56,15 @@ export async function deleteNotifier({ notifierId, userId }) {
 }
 
 /**
- * list of all notifiers (testing only?)
- * @returns {Promise<Array<import('../../types').Notifier>} Array of notifiers
- */
-export async function getNotifiers() {
-  return new Promise((resolve, reject) => {
-    db.all("SELECT * FROM Notifiers", (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows);
-    });
-  });
-}
-
-/**
  * list of all notifiers for a user
  * @returns {Promise<Array<import('../../types').Notifier>} Array of notifiers
  */
 export async function getNotifiersByUser(userId) {
   return new Promise((resolve, reject) => {
-    db.all("SELECT * FROM Notifiers WHERE userId = ?", userId, (err, rows) => 
-      err ? reject(err) : resolve(rows)
+    db.all(
+      "SELECT * FROM Notifiers WHERE userId = ? ORDER BY collateralizationRatio ASC",
+      userId,
+      (err, rows) => (err ? reject(err) : resolve(rows))
     );
   });
 }
@@ -95,7 +84,7 @@ export async function getNotifiersByThreshold({
 }) {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT * FROM Notifiers WHERE collateralizationRatio >= ? AND vaultId = ? AND vaultManagerId = ?",
+      "SELECT * FROM Notifiers WHERE collateralizationRatio >= ? AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
       [collateralizationRatio, vaultId, vaultManagerId],
       (err, rows) => {
         if (err) return reject(err);

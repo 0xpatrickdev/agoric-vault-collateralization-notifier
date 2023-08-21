@@ -25,7 +25,7 @@ export const auth = (fastify, _, done) => {
     try {
       await sendVerifyEmail(email, token);
     } catch (e) {
-      console.warn('Email service error', e.message)
+      console.warn("Email service error", e.message);
       console.log("auth token", token); // for testing
       // disabled for development/testing purposes
       // return reply.status(500).send({
@@ -35,14 +35,8 @@ export const auth = (fastify, _, done) => {
     }
 
     // save user + token in database
-    try {
-      const tokenExpiry = Date.now() + THIRTY_MINUTES_IN_MS;
-      await addOrUpdateUser({ email, token, tokenExpiry, verified: 0 });
-    } catch (e) {
-      return reply.status(500).send({
-        error: "Unexpected error occured.",
-      });
-    }
+    const tokenExpiry = Date.now() + THIRTY_MINUTES_IN_MS;
+    await addOrUpdateUser({ email, token, tokenExpiry, verified: 0 });
 
     // send success response
     reply.send({
