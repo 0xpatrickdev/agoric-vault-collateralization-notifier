@@ -4,8 +4,16 @@ import {
   updateQuote,
   getLatestQuote,
   insertOrUpdateVault,
+  updateNotifierStatus,
+  setNotifierExpired,
+  getNotifiersToReset,
 } from "./db/index.js";
-import { managerIdFromPath, vaultIdFromPath } from "../utils/vstoragePaths.js";
+import {
+  makeVaultPath,
+  managerIdFromPath,
+  vaultIdFromPath,
+} from "../utils/vstoragePaths.js";
+import { vstorageWatcher } from "../vstorageWatcher.js";
 
 /**
  * @param {object} params - The calculated collateralization ratio.
@@ -51,13 +59,26 @@ export async function maybeSendNotification(
 
   for (const notifier of notifiers) {
     // @todo call email api
-    // @todo mark Notifier as "sent" so we don't send it again
+    // mark Notifier as "sent" so we don't send it again
+    await updateNotifierStatus(notifier.id, 1);
     console.log(
       `Sending notification to userId: ${notifier.userId} for managerId: ${vaultManagerId} and vaultId: ${vaultId}`
     );
   }
 
-  // @todo check for notifiers that "cleared the threshold". We need to mark them as "unsent"
+  const activeNotifiers = await getNotifiersToReset({
+    collateralizationRatio,
+    vaultManagerId,
+    vaultId,
+  });
+
+  for (const notifier of activeNotifiers) {
+    // mark Notifier as "inactive" so we can fire if it crosses the threshold again
+    await updateNotifierStatus(notifier.id, 0);
+    console.log(
+      `Resetting active status for: ${notifier.userId} for managerId: ${vaultManagerId} and vaultId: ${vaultId}`
+    );
+  }
 }
 
 export async function handleVault(path, vaultData) {
@@ -80,6 +101,7 @@ export async function handleVault(path, vaultData) {
 
   if (vaultState === "closed" || vaultState === "liquidated") {
     console.log(`Skipping vault with state: ${vaultState}`);
+    await stopWatchingVault(vaultManagerId, vaultId);
     return;
   }
 
@@ -87,7 +109,7 @@ export async function handleVault(path, vaultData) {
     const { quoteAmountIn, quoteAmountOut } = await getLatestQuote(
       vaultManagerId
     );
-    if (!quoteAmountIn || !quoteAmountOut) throw new Error('Quote not found.')
+    if (!quoteAmountIn || !quoteAmountOut) throw new Error("Quote not found.");
     const ratio = calculateCollateralizationRatio({
       locked,
       debt,
@@ -126,5 +148,20 @@ export async function handleQuote(path, value) {
     console.warn(
       `Unable to process quote update for: ${vaultManagerId}. Reason: ${error.message}`
     );
+  }
+}
+
+/**
+ * @param {import('../types').Vault['vaultManagerId']} vaultMangerId
+ * @param {import('../types').Vault['vaultId']} vaultId
+ * @returns {Promise<void>}
+ */
+export async function stopWatchingVault(vaultManagerId, vaultId) {
+  // stop watching vault path
+  vstorageWatcher.removePath(makeVaultPath(vaultManagerId, vaultId));
+  // mark relevant notifiers as expired
+  const notifiers = await getNotifiersByVaultId({ vaultId, vaultManagerId });
+  for (const { id } of notifiers) {
+    await setNotifierExpired(id);
   }
 }

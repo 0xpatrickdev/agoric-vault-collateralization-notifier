@@ -47,6 +47,8 @@ export const setupDb = async () => {
         vaultManagerId INTEGER,
         vaultId INTEGER,
         collateralizationRatio INTEGER,
+        active BOOLEAN DEFAULT 0,
+        expired BOOLEAN DEFAULT 0,
         FOREIGN KEY(userId) REFERENCES Users(id),
         FOREIGN KEY(vaultManagerId, vaultId) REFERENCES Vaults(vaultManagerId, vaultId)
       );

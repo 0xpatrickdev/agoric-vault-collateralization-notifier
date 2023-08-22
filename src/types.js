@@ -14,6 +14,8 @@
  * @property {number} vaultManagerId - The ID of the vaultManager (collateralType) that this notifier is related to.
  * @property {number} vaultId - The ID of the vault that this notifier is related to.
  * @property {number} collateralizationRatio - The collateralization ratio for this notifier.
+ * @property {0|1} active - true when threshold is crossed, false when reset
+ * @property {0|1} expired - true when the vault is liquidated or closed
  */
 
 /**

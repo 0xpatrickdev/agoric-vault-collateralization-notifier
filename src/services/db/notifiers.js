@@ -70,7 +70,7 @@ export async function getNotifiersByUser(userId) {
 }
 
 /**
- * finds all notifiers for a vaultId-vaultManagerId pair below a certain collateralization ratio
+ * finds all unsent notifiers for a vaultId-vaultManagerId pair below a certain collateralization ratio
  * @param {object} opts
  * @param {number} opts.collateralizationRatio collateralization ratio
  * @param {number} opts.vaultId vault's id
@@ -84,12 +84,96 @@ export async function getNotifiersByThreshold({
 }) {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT * FROM Notifiers WHERE collateralizationRatio >= ? AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
+      "SELECT * FROM Notifiers WHERE active = 0 AND expired = 0 AND collateralizationRatio >= ? AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
       [collateralizationRatio, vaultId, vaultManagerId],
       (err, rows) => {
         if (err) return reject(err);
         resolve(rows);
       }
+    );
+  });
+}
+
+/**
+ * finds all sent notifiers for a vaultId-vaultManagerId pair below a certain collateralization ratio
+ * @param {object} opts
+ * @param {number} opts.collateralizationRatio collateralization ratio
+ * @param {number} opts.vaultId vault's id
+ * @param {number} opts.vaultManagerId vault manager's id
+ * @returns {Promise<Array<import('../../types').Notifier>>} Notifiers that meet the criteria
+ */
+export async function getNotifiersToReset({
+  collateralizationRatio,
+  vaultId,
+  vaultManagerId,
+}) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT * FROM Notifiers WHERE active = 1 AND expired = 0 AND collateralizationRatio < ? AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
+      [collateralizationRatio, vaultId, vaultManagerId],
+      (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      }
+    );
+  });
+}
+
+/**
+ * finds all non-expired Notifiers for a vaultId<>vaultManagerId pair
+ * @param {object} opts
+ * @param {number} opts.vaultId vault's id
+ * @param {number} opts.vaultManagerId vault manager's id
+ * @returns {Promise<Array<import('../../types').Notifier>>} Notifiers that meet the criteria
+ */
+export async function getNotifiersByVaultId({ vaultId, vaultManagerId }) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT * FROM Notifiers WHERE expired = 0 AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
+      [vaultId, vaultManagerId],
+      (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      }
+    );
+  });
+}
+
+/**
+ * Marks a Notifier active or inactive.
+ * @param {number} id
+ * @param {0|1} active
+ * @returns {Promise<void>}
+ */
+export async function updateNotifierStatus(id, active) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `
+        UPDATE Notifiers 
+        SET active = ?
+        WHERE id = ?
+      `,
+      [active, id],
+      (err) => (err ? reject(err) : resolve())
+    );
+  });
+}
+
+/**
+ * Sets a Notifier to expired.
+ * @param {number} id
+ * @returns {Promise<void>}
+ */
+export async function setNotifierExpired(id) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `
+        UPDATE Notifiers 
+        SET expired = 1
+        WHERE id = ?
+      `,
+      [id],
+      (err) => (err ? reject(err) : resolve())
     );
   });
 }
