@@ -32,7 +32,7 @@ export async function createNotifier(notifier) {
  * checks if user owns Notifier then deletes it
  * @param {string} notifierId id of notifier to delete
  * @param {string} userId user's id
- * @returns {Promise<unknown|Error>} user
+ * @returns {Promise<{success: boolean, vaultId: number, vaultManagerId: number}|Error>} user
  */
 export async function deleteNotifier({ notifierId, userId }) {
   return new Promise((resolve, reject) => {
@@ -47,7 +47,11 @@ export async function deleteNotifier({ notifierId, userId }) {
           [notifierId, userId],
           (err) => {
             if (err) return reject(err);
-            resolve(`Notifier with id: ${notifierId} was deleted.`);
+            resolve({
+              success: true,
+              vaultId: row.vaultId,
+              vaultManagerId: row.vaultManagerId,
+            });
           }
         );
       }

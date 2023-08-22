@@ -23,6 +23,7 @@
  * @property {string} isserName
  * @property {'nat'|'set'|'copy_set'|'copy_bag'} assetKind
  * @property {number} decimalPlaces
+ * @property {string} brand
  */
 
 /**

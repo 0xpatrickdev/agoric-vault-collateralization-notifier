@@ -3,15 +3,17 @@ import {
   getAllVaultsByManagerId,
   updateQuote,
   getLatestQuote,
-  insertOrUpdateVault,
+  insertOrReplaceVault,
   updateNotifierStatus,
   setNotifierExpired,
   getNotifiersToReset,
+  getNotifiersByVaultId,
+  insertOrReplaceBrand,
 } from "./db/index.js";
 import {
   makeVaultPath,
-  managerIdFromPath,
-  vaultIdFromPath,
+  quoteFromQuoteState,
+  vaultFromVaultState,
 } from "../utils/vstoragePaths.js";
 import { vstorageWatcher } from "../vstorageWatcher.js";
 import { calculateCollateralizationRatio } from "../utils/vaultMath.js";
@@ -61,19 +63,10 @@ export async function maybeSendNotification(
 }
 
 export async function handleVault(path, vaultData) {
-  const { locked: _locked, debtSnapshot, vaultState } = vaultData;
-  const vaultManagerId = managerIdFromPath(path);
-  const vaultId = vaultIdFromPath(path);
-  const locked = Number(_locked.value);
-  const debt = Number(debtSnapshot.debt.value);
+  const vault = vaultFromVaultState(path, vaultData);
+  const { state: vaultState, vaultManagerId, vaultId } = vault;
   try {
-    await insertOrUpdateVault({
-      vaultId,
-      vaultManagerId,
-      locked,
-      debt,
-      state: vaultState,
-    });
+    await insertOrReplaceVault(vault);
   } catch (e) {
     console.warn("error updating vault", e.message);
   }
@@ -104,10 +97,10 @@ export async function handleVault(path, vaultData) {
 }
 
 export async function handleQuote(path, value) {
-  const { amountIn, amountOut } = value.quoteAmount.value[0];
-  const vaultManagerId = managerIdFromPath(path);
-  const quoteAmountIn = Number(amountIn.value);
-  const quoteAmountOut = Number(amountOut.value);
+  const { vaultManagerId, quoteAmountIn, quoteAmountOut } = quoteFromQuoteState(
+    path,
+    value
+  );
 
   try {
     await updateQuote({ vaultManagerId, quoteAmountIn, quoteAmountOut });
@@ -126,6 +119,23 @@ export async function handleQuote(path, value) {
   } catch (error) {
     console.warn(
       `Unable to process quote update for: ${vaultManagerId}. Reason: ${error.message}`
+    );
+  }
+}
+
+export async function handleVbankAssets(_, value) {
+  try {
+    const promises = value.map(([_denom, { displayInfo, brand, issuerName }]) =>
+      insertOrReplaceBrand({
+        issuerName,
+        brand: String(brand),
+        ...displayInfo,
+      })
+    );
+    await Promise.all(promises);
+  } catch (error) {
+    console.warn(
+      `Unable to process db upserts for vbank assets. Reason: ${error.message}`
     );
   }
 }

@@ -6,13 +6,19 @@ import { db } from "./index.js";
  * @param {string} brandData.issuerName - The name of the brand
  * @param {string} brandData.assetKind - The kind of asset (e.g., 'fungible', 'non-fungible')
  * @param {number} brandData.decimalPlaces - The number of decimal places for the asset
+ * @param {number} brandData.brand - String of ERTP brand object
  * @returns {Promise<void>}
  */
-export async function insertBrand(brandData) {
+export async function insertOrReplaceBrand(brandData) {
   return new Promise((resolve, reject) => {
     db.run(
-      `INSERT INTO Brands (issuerName, assetKind, decimalPlaces) VALUES (?, ?, ?)`,
-      [brandData.issuerName, brandData.assetKind, brandData.decimalPlaces],
+      `INSERT OR REPLACE INTO Brands (issuerName, assetKind, decimalPlaces, brand) VALUES (?, ?, ?, ?)`,
+      [
+        brandData.issuerName,
+        brandData.assetKind,
+        brandData.decimalPlaces,
+        brandData.brand,
+      ],
       (err) => {
         if (err) reject(err);
         else resolve();
@@ -38,3 +44,18 @@ export function checkBrandExists(issuerName) {
     );
   });
 }
+
+/**
+ * Retrieve an issuerName from a brand
+ * @param {string} brand
+ * @returns {Promise<boolean>}
+ */
+export function getIssuerNameFromBrand(brand) {
+  return new Promise((resolve, reject) => {
+    db.get("SELECT * FROM Brands WHERE brand = ?", [brand], (err, row) => {
+      if (err) return reject(err);
+      resolve(row.issuerName);
+    });
+  });
+}
+

@@ -1,4 +1,5 @@
 /**
+ * @todo incorporate decimals logic. This assumes 6 decimals for both assets
  * @param {object} params - The calculated collateralization ratio.
  * @param {number} params.locked
  * @param {number} params.debt

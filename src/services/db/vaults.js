@@ -6,11 +6,13 @@ import { db } from "./index.js";
  */
 export async function getUniqueVaultManagerIds() {
   return new Promise((resolve, reject) => {
-    // db.all("SELECT DISTINCT vaultManagerId FROM Notifiers", (err, rows) => {
-    db.all("SELECT DISTINCT vaultManagerId FROM Vaults", (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows.map((row) => row.vaultManagerId));
-    });
+    db.all(
+      "SELECT DISTINCT vaultManagerId FROM Notifiers WHERE expired = 0",
+      (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows.map((row) => row.vaultManagerId));
+      }
+    );
   });
 }
 
@@ -24,7 +26,7 @@ export async function getUniqueVaultManagerIds() {
  * @param {string} vaultData.state - The state of the vault
  * @returns {Promise<void>}
  */
-export async function insertOrUpdateVault(vaultData) {
+export async function insertOrReplaceVault(vaultData) {
   return new Promise((resolve, reject) => {
     db.run(
       `

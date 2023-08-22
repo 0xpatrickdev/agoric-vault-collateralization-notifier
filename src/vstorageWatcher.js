@@ -4,8 +4,16 @@ import {
   getUniqueVaultManagerAndVaultIds,
   db,
 } from "./services/db/index.js";
-import { makeVaultPath, makeQuotePath } from "./utils/vstoragePaths.js";
-import { handleQuote, handleVault } from "./services/followers.js";
+import {
+  makeVaultPath,
+  makeQuotePath,
+  makeVbankAssetPath,
+} from "./utils/vstoragePaths.js";
+import {
+  handleQuote,
+  handleVault,
+  handleVbankAssets,
+} from "./services/followers.js";
 
 let vstorageWatcher;
 
@@ -16,15 +24,22 @@ export async function initVstorageWatcher() {
     getUniqueVaultManagerIds(),
     getUniqueVaultManagerAndVaultIds(),
   ]);
+  if (managerIds.length)
+    console.info(`Found ${managerIds.length} quotes from db to follow.`);
+  if (vaultIds.length)
+    console.info(`Found ${vaultIds.length} vaults from db to follow.`);
 
+  const brands = [[makeVbankAssetPath(), "vbank"]];
   const quotes = managerIds.map((id) => [makeQuotePath(id), "quote"]);
   const vaults = vaultIds.map((ids) => [makeVaultPath(...ids), "vault"]);
 
-  vstorageWatcher = await makeVstorageWatcher(vaults, {
+  vstorageWatcher = await makeVstorageWatcher(brands, {
     quote: handleQuote,
     vault: handleVault,
+    vbank: handleVbankAssets,
   });
   vstorageWatcher.watchPaths(quotes);
+  vstorageWatcher.watchPaths(vaults);
   return vstorageWatcher;
 }
 

@@ -60,7 +60,7 @@ test("createNotifier inserts a notifier and returns it", async (t) => {
   const result = await createNotifier(notifier);
   t.deepEqual(
     result,
-    { ...notifier, id: 1 },
+    { ...notifier, id: 1, active: 0, expired: 0 },
     "createNotifier should return the notifier with an id"
   );
 });

@@ -26,6 +26,56 @@ export const getNetworkConfig = async () => {
   return { rpc: networkConfig.rpcAddrs[0], chainName: networkConfig.chainName };
 };
 
+
+function tryUnmarshal(data) {
+  let unmarshalled;
+  try {
+    unmarshalled = importContext.fromBoard.fromCapData(data);
+  } catch (e) {
+    // workaround, as unmarshal throws an error "bad board slot null" for quotes query
+    const _unserialize = (value) => {
+      return JSON.parse(value.body.slice(1));
+    };
+    unmarshalled = _unserialize(data);
+  }
+  return unmarshalled;
+}
+
+/**
+ * @param {string} path
+ * @param {AgoricChainStoragePathKind} [type] default to data
+ * @param {boolean} [type] default to data
+ */
+export const abciQuery = async (
+  path,
+  type = AgoricChainStoragePathKind.Data
+) => {
+  try {
+    const { rpc } = await getNetworkConfig();
+    const options = {
+      method: "POST",
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "abci_query",
+        params: { path: `custom/vstorage/${type}/${path}` },
+      }),
+    };
+    const response = await fetch(rpc, options);
+    const { result } = await response.json();
+    if (!result.response.value) throw new Error(result.response.log);
+    const data = JSON.parse(
+      Buffer.from(result.response.value, "base64").toString("binary")
+    );
+    const { values } = JSON.parse(data.value);
+    const parsed = tryUnmarshal(JSON.parse(values[values.length - 1]));
+    return parsed;
+  } catch (e) {
+    throw new Error(e);
+  }
+};
+
+
 export const getBatchQueryWatcher = async () => {
   const { rpc, chainName } = await getNetworkConfig();
   const watcher = makeAgoricChainStorageWatcher(
@@ -44,7 +94,7 @@ export const getBatchQueryWatcher = async () => {
  */
 
 /**
- * @typedef {('vault'|'quote')} HandlerType
+ * @typedef {('vault'|'quote'|'vbank')} HandlerType
  */
 
 /**

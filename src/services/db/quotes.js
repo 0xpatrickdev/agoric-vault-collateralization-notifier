@@ -1,13 +1,13 @@
 import { db } from "./index.js";
 
 /**
- * list of unique vaultIds
- * @returns {Promise<Array<import('../types').Notifier>} Array of unique pairs of vaultManagerId and vaultId
+ * list of unique [vaultManager, vaultId] pairs
+ * @returns {Promise<[import('../../types').Vault['vaultManagerId'], import('../../types').Vault['vaultId']]>} Array of unique pairs of vaultManagerId and vaultId
  */
 export async function getUniqueVaultManagerAndVaultIds() {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT DISTINCT vaultManagerId, vaultId FROM Vaults",
+      "SELECT DISTINCT vaultManagerId, vaultId FROM Notifiers WHERE expired = 0",
       (err, rows) => {
         if (err) return reject(err);
         resolve(rows.map((row) => [row.vaultManagerId, row.vaultId]));
@@ -17,7 +17,7 @@ export async function getUniqueVaultManagerAndVaultIds() {
 }
 
 /**
- * Insert a quote in the Quotes table.
+ * Insert or replace a quote in the Quotes table.
  * @param {Object} quoteData
  * @param {number} quoteData.vaultManagerId - The vault manager ID (e.g., 0)
  * @param {number} quoteData.quoteAmountIn - The amount in
@@ -26,11 +26,11 @@ export async function getUniqueVaultManagerAndVaultIds() {
  * @param {string} quoteData.outIssuerName - The amount out
  * @returns {Promise<void>}
  */
-export async function insertQuote(quoteData) {
+export async function insertOrReplaceQuote(quoteData) {
   return new Promise((resolve, reject) => {
     db.run(
       `
-        INSERT INTO Quotes 
+        INSERT OR REPLACE INTO Quotes 
         (vaultManagerId, quoteAmountIn, quoteAmountOut, inIssuerName, outIssuerName, latestTimestamp)
         VALUES (?, ?, ?, ?, ?, ?)
       `,

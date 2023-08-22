@@ -1,16 +1,23 @@
 import { isNumber, isNaturalNumber } from "../utils/validation.js";
 import {
   createNotifier,
-  getNotifiersByUser,
-  deleteNotifier,
-  checkVaultExists,
   checkQuoteExists,
-  insertQuote,
-  insertBrand,
-  checkBrandExists,
+  checkVaultExists,
+  deleteNotifier,
+  getIssuerNameFromBrand,
+  getNotifiersByVaultId,
+  getNotifiersByUser,
+  insertOrReplaceVault,
+  insertOrReplaceQuote,
 } from "../services/db/index.js";
-import { makeVaultPath, makeQuotePath } from "../utils/vstoragePaths.js";
+import {
+  makeQuotePath,
+  makeVaultPath,
+  quoteFromQuoteState,
+  vaultFromVaultState,
+} from "../utils/vstoragePaths.js";
 import { vstorageWatcher } from "../vstorageWatcher.js";
+import { abciQuery } from "../services/rpc.js";
 
 /** @returns {import('fastify').FastifyPluginCallback} */
 export const notifiers = (fastify, _, done) => {
@@ -43,50 +50,45 @@ export const notifiers = (fastify, _, done) => {
           .status(400)
           .send({ error: "collateralizationRatio must be a number" });
 
-      const quoteExists = await checkQuoteExists(vaultManagerId);
-      if (!quoteExists) {
-        // First, check if the related Brands exist or not
+      // ensure vault exists and is active, then add to db
+      const vaultExistsInDb = await checkVaultExists(vaultManagerId, vaultId);
+      const vaultPath = makeVaultPath(vaultManagerId, vaultId);
+      if (!vaultExistsInDb) {
+        let vaultData;
         try {
-          const brandInExists = await checkBrandExists("IST");
-          const brandOutExists = await checkBrandExists("ATOM");
-
-          // If brands do not exist, add them
-          if (!brandInExists)
-            await insertBrand({
-              issuerName: "IST",
-              assetKind: "nat",
-              decimalPlaces: 6,
-            });
-          if (!brandOutExists)
-            await insertBrand({
-              issuerName: "ATOM",
-              assetKind: "nat",
-              decimalPlaces: 6,
-            });
+          vaultData = await abciQuery(vaultPath);
         } catch (e) {
-          console.warn("Error adding brand", e.message);
+          if (e.message.includes("could not get vstorage path")) {
+            return reply.status(400).send({ error: "Vault does not exist" });
+          } else return reply.status(500).send({ error: "Unexpected error." });
         }
-        
-        try {
-          await insertQuote({
-            vaultManagerId,
-            quoteAmountIn: 0, // @todo, get real value from RPC
-            quoteAmountOut: 0, // @todo, get real value from RPC
+        const vault = vaultFromVaultState(vaultPath, vaultData);
+        if (vault.state === "liquidated" || vault.state === "closed") {
+          return reply.status(400).send({ error: "Vault is inactive." });
+        }
+        await insertOrReplaceVault(vault);
+
+        // add quote record to db if it doesn't exist
+        const quoteExists = await checkQuoteExists(vaultManagerId);
+        const quotePath = makeQuotePath(vaultManagerId);
+        if (!quoteExists) {
+          const outIssuerName = await getIssuerNameFromBrand(
+            String(vaultData.locked.brand)
+          );
+          let quoteData;
+          try {
+            quoteData = await abciQuery(quotePath);
+          } catch (e) {
+            return reply.status(500).send({ error: "Unexpected error." });
+          }
+          const quote = quoteFromQuoteState(quotePath, quoteData);
+          await insertOrReplaceQuote({
+            ...quote,
             inIssuerName: "IST",
-            inIssuerName: "ATOM", // @todo, get real value from RPC
+            outIssuerName,
           });
-        } catch (e) {
-          console.warn("error inserting quote");
         }
       }
-
-      const vaultExists = await checkVaultExists(vaultManagerId, vaultId);
-      // if (!vaultExists) {
-      //   // v2. query 1x rpc to see if vault and vaultManager exists
-      //   await insertOrUpdateVault({ vaultManagerId, vaultId });
-      // }
-
-      // @todo see if quote exists via 1x rpc and add to db
 
       await createNotifier({
         userId,
@@ -96,14 +98,9 @@ export const notifiers = (fastify, _, done) => {
       });
 
       reply.send({ success: true });
-      if (!quoteExists)
-        vstorageWatcher.watchPath(makeQuotePath(vaultManagerId), "quote");
 
-      if (!vaultExists)
-        vstorageWatcher.watchPath(
-          makeVaultPath(vaultManagerId, vaultId),
-          "vault"
-        );
+      vstorageWatcher.watchPath(quotePath, "quote");
+      vstorageWatcher.watchPath(vaultPath, "vault");
     } catch (e) {
       console.error(e);
       return reply.status(500).send({ error: "Unexpected error." });
@@ -126,8 +123,14 @@ export const notifiers = (fastify, _, done) => {
     const { userId } = request.user;
     const { notifierId } = request.params;
     try {
-      await deleteNotifier({ userId, notifierId });
-      // @todo update follower service
+      const res = await deleteNotifier({ userId, notifierId });
+      // query if it's the last notifier for the vault. If yes, remove watcher
+      const remainingNotifiers = await getNotifiersByVaultId(res);
+      if (!remainingNotifiers.length) {
+        const path = makeVaultPath(res.vaultManagerId, res.vaultId);
+        vstorageWatcher.removePath(path);
+      }
+      // @todo can check for quote followers to stop, but probably not necessary rn
       reply.send({ success: true });
     } catch (err) {
       console.error(err);

@@ -57,7 +57,8 @@ export const setupDb = async () => {
       CREATE TABLE IF NOT EXISTS Brands (
         issuerName TEXT PRIMARY KEY,
         assetKind TEXT CHECK(assetKind IN ('nat', 'set', 'copy_set', 'copy_bag')),
-        decimalPlaces INTEGER
+        decimalPlaces INTEGER,
+        brand TEXT
       );
     `);
     db.run(`
