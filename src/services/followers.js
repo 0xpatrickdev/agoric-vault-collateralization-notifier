@@ -14,28 +14,7 @@ import {
   vaultIdFromPath,
 } from "../utils/vstoragePaths.js";
 import { vstorageWatcher } from "../vstorageWatcher.js";
-
-/**
- * @param {object} params - The calculated collateralization ratio.
- * @param {number} params.locked
- * @param {number} params.debt
- * @param {number} params.quoteAmountIn
- * @param {number} params.quoteAmountOut
- * @returns {number} ratio rounded to nearest percent
- */
-export const calculateCollateralizationRatio = ({
-  locked,
-  debt,
-  quoteAmountIn,
-  quoteAmountOut,
-}) => {
-  return Number(
-    ((BigInt(locked) * BigInt(quoteAmountOut)) /
-      BigInt(quoteAmountIn) /
-      BigInt(debt)) *
-      100n
-  );
-};
+import { calculateCollateralizationRatio } from "../utils/vaultMath.js";
 
 /**
  * Logic to handle notifications based on collateralization ratio.
