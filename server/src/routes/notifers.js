@@ -53,6 +53,7 @@ export const notifiers = (fastify, _, done) => {
       // ensure vault exists and is active, then add to db
       const vaultExistsInDb = await checkVaultExists(vaultManagerId, vaultId);
       const vaultPath = makeVaultPath(vaultManagerId, vaultId);
+      const quotePath = makeQuotePath(vaultManagerId);
       if (!vaultExistsInDb) {
         let vaultData;
         try {
@@ -70,7 +71,6 @@ export const notifiers = (fastify, _, done) => {
 
         // add quote record to db if it doesn't exist
         const quoteExists = await checkQuoteExists(vaultManagerId);
-        const quotePath = makeQuotePath(vaultManagerId);
         if (!quoteExists) {
           const outIssuerName = await getIssuerNameFromBrand(
             String(vaultData.locked.brand)

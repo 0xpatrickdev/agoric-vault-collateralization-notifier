@@ -1,0 +1,53 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "description": "email notifications for vault collateralization levels",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "c8 ava 'test/**/test-*.js' --serial ",
+    "test:watch": "ava 'test/**/test-*.js' -w --serial"
+  },
+  "author": "0xPatrick <patrick@0xpatrick.dev> (https://0xpatrick.dev)",
+  "license": "MIT",
+  "dependencies": {
+    "@agoric/casting": "^0.4.2",
+    "@agoric/cosmic-proto": "^0.3.0",
+    "@agoric/smart-wallet": "^0.5.3",
+    "@cosmjs/stargate": "^0.31.0",
+    "@cosmjs/tendermint-rpc": "^0.31.0",
+    "@endo/init": "^0.5.57",
+    "@endo/marshal": "^0.8.8",
+    "@fastify/jwt": "^7.2.0",
+    "axios": "^1.4.0",
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.21.0",
+    "fastify-plugin": "^4.5.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "ava": "^5.3.1",
+    "c8": "^8.0.1",
+    "sinon": "^15.2.0"
+  },
+  "ava": {
+    "nodeArguments": [],
+    "files": [
+      "test/**/test-*.js"
+    ],
+    "ignoredByWatcher": [
+      "node_modules/**",
+      "coverage/**",
+      "database/**",
+      "**/*.sqlite"
+    ]
+  },
+  "c8": {
+    "exclude": [
+      "src/lib/*.js",
+      "test/**/*.js"
+    ]
+  }
+}

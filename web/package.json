@@ -1,0 +1,11 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "description": "frontend, email notifications for vault collateralization levels",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "void"
+  },
+  "author": "0xPatrick <patrick@0xpatrick.dev> (https://0xpatrick.dev)",
+  "license": "MIT"
+}
