@@ -54,7 +54,7 @@ export function getIssuerNameFromBrand(brand) {
   return new Promise((resolve, reject) => {
     db.get("SELECT * FROM Brands WHERE brand = ?", [brand], (err, row) => {
       if (err) return reject(err);
-      resolve(row.issuerName);
+      resolve(row?.issuerName);
     });
   });
 }
