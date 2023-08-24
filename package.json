@@ -2,11 +2,22 @@
   "name": "agoric-vault-collateralization-notifier",
   "description": "email notifications for vault collateralization levels",
   "private": true,
-  "workspaces": ["shared", "server", "web"],
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
   "scripts": {
     "server:test": "yarn workspace server test",
     "server:test:watch": "yarn workspace server test:watch",
-    "server:start": "yarn workspace server start"
+    "server:start": "yarn workspace server start",
+    "server:lint": "yarn workspace server lint"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0"
+  },
+  "engines": {
+    "node": ">=18.14.x"
   },
   "author": "0xPatrick <patrick@0xpatrick.dev> (https://0xpatrick.dev)",
   "license": "MIT"

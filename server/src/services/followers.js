@@ -64,7 +64,7 @@ export async function maybeSendNotification(
 
 export async function handleVault(path, vaultData) {
   const vault = vaultFromVaultState(path, vaultData);
-  const { state: vaultState, vaultManagerId, vaultId } = vault;
+  const { state: vaultState, vaultManagerId, vaultId, locked, debt } = vault;
   try {
     await insertOrReplaceVault(vault);
   } catch (e) {

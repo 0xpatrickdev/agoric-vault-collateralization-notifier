@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    }
+  },
+  "include": ["server/*", "shared/*", "web/*"],
+  "exclude": ["node_modules", "build", "dist", "coverage", "database"]
+}

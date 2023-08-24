@@ -1,3 +1,4 @@
+/* global harden */
 import { batchVstorageQuery, keyToPath, pathToKey } from "./batchQuery.js";
 
 const defaults = {

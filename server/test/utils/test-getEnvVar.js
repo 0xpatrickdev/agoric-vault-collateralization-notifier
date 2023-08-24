@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { getEnvVar, getEnvVars } from "../../src/utils/getEnvVar.js";
 
-test.beforeEach(async (t) => {
+test.beforeEach(async () => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
 });
 

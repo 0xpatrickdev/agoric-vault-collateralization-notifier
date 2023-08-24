@@ -7,7 +7,7 @@ import {
   verifyToken,
 } from "../../src/services/encryption.js";
 
-test.beforeEach(async (t) => {
+test.beforeEach(async () => {
   dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
 });
 
