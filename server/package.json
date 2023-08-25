@@ -24,6 +24,8 @@
     "@cosmjs/tendermint-rpc": "^0.31.0",
     "@endo/init": "^0.5.57",
     "@endo/marshal": "^0.8.8",
+    "@fastify/cookie": "^9.0.4",
+    "@fastify/cors": "^8.3.0",
     "@fastify/jwt": "^7.2.0",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",

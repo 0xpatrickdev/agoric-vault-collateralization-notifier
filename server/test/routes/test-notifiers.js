@@ -44,10 +44,10 @@ test.beforeEach(async (t) => {
         .split(".")[0],
     },
   });
-  if (!verifyResponse.headers.authorization.includes("Bearer ")) {
+  if (!verifyResponse.headers["set-cookie"].includes("HttpOnly")) {
     throw new Error("Error getting jwt token.");
   }
-  t.context.headers = { authorization: verifyResponse.headers.authorization };
+  t.context.headers = { cookie: verifyResponse.headers["set-cookie"] };
 });
 
 test.afterEach.always(async (t) => {

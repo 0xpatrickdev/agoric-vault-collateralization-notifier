@@ -102,7 +102,7 @@ test("verify returns 200 with a valid access token", async (t) => {
   t.is(verifyResponse.statusCode, 200);
   t.deepEqual(await verifyResponse.json(), { success: true });
   t.truthy(
-    verifyResponse.headers.authorization.includes("Bearer "),
+    verifyResponse.headers["set-cookie"].includes("HttpOnly"),
     "Authorization header is set"
   );
 });

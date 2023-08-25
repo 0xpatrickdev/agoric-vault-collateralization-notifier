@@ -7,6 +7,7 @@ import { sendVerifyEmail } from "../services/email.js";
 import { generateToken } from "../services/encryption.js";
 import { isValidEmail } from "../utils/isValidEmail.js";
 import { THIRTY_MINUTES_IN_MS } from "../utils/constants.js";
+import { getEnvVar } from "../utils/getEnvVar.js";
 
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "30d";
 
@@ -78,8 +79,15 @@ export const auth = (fastify, _, done) => {
       { email: user.email, userId: user.id },
       { expiresIn: JWT_EXPIRY }
     );
-    reply.header("Authorization", "Bearer " + jwt);
-    reply.send({ success: true });
+
+    reply
+      .setCookie(getEnvVar("JWT_COOKIE_NAME"), jwt, {
+        secure: true,
+        httpOnly: true,
+        sameSite: "Strict",
+        path: "/",
+      })
+      .send({ success: true });
   });
 
   done();

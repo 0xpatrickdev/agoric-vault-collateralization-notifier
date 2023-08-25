@@ -1,21 +1,24 @@
 import fp from "fastify-plugin";
 import jwt from "@fastify/jwt";
+import cookie from "@fastify/cookie";
+import { getEnvVars } from "../utils/getEnvVar.js";
 
 /**
  * @param {import('fastify').FastifyInstance} fastify
- * @param {string} opts.secret JWT secret
  */
-export const jwtPlugin = fp(async function (fastify, { secret }) {
+export const jwtPlugin = fp(async function (fastify) {
+  const [JWT_SECRET, JWT_COOKIE_NAME] = getEnvVars([
+    "JWT_SECRET",
+    "JWT_COOKIE_NAME",
+  ]);
+
   fastify.register(jwt, {
-    secret: secret,
+    secret: JWT_SECRET,
+    cookie: {
+      cookieName: JWT_COOKIE_NAME,
+      signed: false,
+    },
   });
 
-  fastify.decorate("authenticate", async function (request, reply) {
-    try {
-      await request.jwtVerify();
-    } catch (err) {
-      console.error(err);
-      reply.status(401).send({ error: "Unauthorized" });
-    }
-  });
+  fastify.register(cookie);
 });
