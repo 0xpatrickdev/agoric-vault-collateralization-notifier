@@ -1,8 +1,67 @@
+/* global require */
+
+const sans = [
+  "Roboto",
+  "ui-sans-serif",
+  "system-ui",
+  "-apple-system",
+  "BlinkMacSystemFont",
+  "Segoe UI",
+  "Helvetica Neue",
+  "Arial",
+  "Noto Sans",
+  "sans-serif",
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol",
+  "Noto Color Emoji",
+];
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [],
+  mode: "jit", // update this line
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "rgba(var(--color-primary), <alpha-value>)",
+        secondary: "rgba(var(--color-secondary), <alpha-value>)",
+        alternative: "rgba(var(--color-alternative), <alpha-value>)",
+        alert: "rgba(var(--color-alert), <alpha-value>)",
+        interYellow: "rgba(var(--inter-yellow), <alpha-value>)",
+        interYellow2: "rgba(var(--inter-yellow-2), <alpha-value>)",
+        interYellow3: "rgba(var(--inter-yellow-3), <alpha-value>)",
+        interYellow4: "rgba(var(--inter-yellow-4), <alpha-value>)",
+        interYellow5: "rgba(var(--inter-yellow-5), <alpha-value>)",
+        interYellow6: "rgba(var(--inter-yellow-6), <alpha-value>)",
+        interYellow7: "rgba(var(--inter-yellow-7), <alpha-value>)",
+        interYellow8: "rgba(var(--inter-yellow-8), <alpha-value>)",
+        interOrange: "rgba(var(--inter-orange), <alpha-value>)",
+        interPurple: "rgba(var(--inter-purple), <alpha-value>)",
+        interGreen: "rgba(var(--inter-green), <alpha-value>)",
+        disabled: "rgba(var(--color-disabled), <alpha-value>)",
+      },
+      boxShadow: {
+        card: "0 22px 34px rgba(116,116,116,0.25)",
+      },
+      borderRadius: {
+        10: "10px",
+        20: "20px",
+      },
+      fontFamily: {
+        sans,
+        serif: [
+          "Roboto Slab",
+          "ui-serif",
+          "Georgia",
+          "Cambria",
+          "Times New Roman",
+          "Times",
+          "serif",
+        ],
+        altSans: ["Mulish", ...sans],
+      },
+    },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/forms")],
 };

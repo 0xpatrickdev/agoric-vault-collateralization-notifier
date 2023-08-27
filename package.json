@@ -11,7 +11,10 @@
     "server:test": "yarn workspace server test",
     "server:test:watch": "yarn workspace server test:watch",
     "server:start": "yarn workspace server start",
-    "server:lint": "yarn workspace server lint"
+    "server:lint": "yarn workspace server lint",
+    "web:dev": "yarn workspace web dev",
+    "web:start": "yarn workspace web start",
+    "web:lint": "yarn workspace web lint"
   },
   "devDependencies": {
     "eslint": "^8.47.0"
