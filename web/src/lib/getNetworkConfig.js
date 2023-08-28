@@ -1,9 +1,12 @@
+const getNetConfigUrl = (netName) =>
+  `https://${netName}.agoric.net/network-config`;
+
 /**
  * @param {import('@shared/types').NetName} netName
  * @returns {Promise<{ rpc: string, chainName: string }>}
  */
 const getNetworkConfig = async (netName = "main") => {
-  const response = await fetch(`https://${netName}.agoric.net/network-config`, {
+  const response = await fetch(getNetConfigUrl(netName), {
     headers: { accept: "application/json" },
   });
   const networkConfig = await response.json();
@@ -17,4 +20,4 @@ const getNetworkConfig = async (netName = "main") => {
   };
 };
 
-export { getNetworkConfig };
+export { getNetworkConfig, getNetConfigUrl };

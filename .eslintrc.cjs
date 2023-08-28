@@ -5,5 +5,10 @@ module.exports = {
   ignorePatterns: [".eslintrc.cjs"],
   parserOptions: { ecmaVersion: 12, sourceType: "module" },
   plugins: [],
-  rules: {},
+  rules: {
+    "no-unused-vars": [
+      "error",
+      { vars: "all", args: "all", argsIgnorePattern: "^_" },
+    ],
+  },
 };

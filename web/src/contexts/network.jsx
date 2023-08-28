@@ -6,7 +6,7 @@ const NetworkContext = createContext();
 
 export const NetworkContextProvider = ({ children }) => {
   /** @type {import('@shared/types').NetName} */
-  const [netName, setNameName] = useState("main");
+  const [netName, setNameName] = useState("devnet");
   const [networkConfig, setNetworkConfig] = useState(undefined);
   const [error, setError] = useState(undefined);
 

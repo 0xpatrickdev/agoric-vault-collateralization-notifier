@@ -73,7 +73,7 @@ const Empty = ({
 };
 
 Empty.defaultProps = {
-  title: "No Vaults",
+  title: "No Wallet Connection",
   description: "Connect your wallet to get started.",
   buttonText: "Connect Wallet",
   graphic: "vault",

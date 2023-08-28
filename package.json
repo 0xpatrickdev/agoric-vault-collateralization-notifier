@@ -19,9 +19,6 @@
   "devDependencies": {
     "eslint": "^8.47.0"
   },
-  "engines": {
-    "node": ">=18.14.x"
-  },
   "author": "0xPatrick <patrick@0xpatrick.dev> (https://0xpatrick.dev)",
   "license": "MIT"
 }

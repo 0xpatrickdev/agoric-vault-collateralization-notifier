@@ -1,9 +1,12 @@
 import { ChainContextProvider } from "./chain";
 import { NetworkContextProvider } from "./network";
+import { WalletContextProvider } from "./wallet";
 
 const ContextProviders = ({ children }) => (
   <NetworkContextProvider>
-    <ChainContextProvider>{children}</ChainContextProvider>
+    <WalletContextProvider>
+      <ChainContextProvider>{children}</ChainContextProvider>
+    </WalletContextProvider>
   </NetworkContextProvider>
 );
 
