@@ -52,7 +52,7 @@ test("register throws an error when an invalid email is provided", async (t) => 
     },
   });
   t.is(response.statusCode, 400);
-  t.deepEqual(await response.json(), { error: "Invalid email address." });
+  t.deepEqual(await response.json(), { error: "Email address is invalid." });
 });
 
 test("register returns 200 when valid email is provided", async (t) => {
@@ -79,15 +79,14 @@ test("verify returns 200 with a valid access token", async (t) => {
   t.is(registerResponse.statusCode, 200);
   t.true(t.context.postStub.calledOnce, "stubbed fetch is called");
 
-  const fetchStubArgs = t.context.postStub.getCall(0).args[1].body;
+  const fetchStubArgs = t.context.postStub.getCall(0).args[1];
 
-  t.is(fetchStubArgs.get("from"), process.env.EMAIL_FROM);
-  t.is(fetchStubArgs.get("subject"), "Inter Vault Alerts: Email Verification");
-  t.is(fetchStubArgs.get("to"), body.email);
+  t.is(fetchStubArgs.from, process.env.EMAIL_FROM);
+  t.is(fetchStubArgs.subject, "Inter Vault Alerts: Email Verification");
+  t.is(fetchStubArgs.to[0], body.email);
 
   // extract access token from the email body
-  const accessToken = fetchStubArgs
-    .get("text")
+  const accessToken = fetchStubArgs.text
     .split("verify?token=")[1]
     .split(".")[0];
 
@@ -117,15 +116,14 @@ test("verify returns 400 with a invalid access token", async (t) => {
   t.is(registerResponse.statusCode, 200);
   t.true(t.context.postStub.calledOnce, "stubbed fetch is called");
 
-  const fetchStubArgs = t.context.postStub.getCall(0).args[1].body;
+  const fetchStubArgs = t.context.postStub.getCall(0).args[1];
 
-  t.is(fetchStubArgs.get("from"), process.env.EMAIL_FROM);
-  t.is(fetchStubArgs.get("subject"), "Inter Vault Alerts: Email Verification");
-  t.is(fetchStubArgs.get("to"), body.email);
+  t.is(fetchStubArgs.from, process.env.EMAIL_FROM);
+  t.is(fetchStubArgs.subject, "Inter Vault Alerts: Email Verification");
+  t.is(fetchStubArgs.to[0], body.email);
 
   // extract access token from the email body
-  const accessToken = fetchStubArgs
-    .get("text")
+  const accessToken = fetchStubArgs.text
     .split("verify?token=")[1]
     .split(".")[0];
 
@@ -155,13 +153,12 @@ test("verify returns 400 with a invalid access token", async (t) => {
 
 //   const fetchStubArgs = t.context.postStub.getCall(0).args[1].body;
 
-//   t.is(fetchStubArgs.get("from"), process.env.EMAIL_FROM);
-//   t.is(fetchStubArgs.get("subject"), "Inter Vault Alerts: Email Verification");
-//   t.is(fetchStubArgs.get("to"), body.email);
+//   t.is(fetchStubArgs.from, process.env.EMAIL_FROM);
+//   t.is(fetchStubArgs.subject, "Inter Vault Alerts: Email Verification");
+//   t.is(fetchStubArgs.to[0], body.email);
 
 //   // extract access token from the email body
-//   const accessToken = fetchStubArgs
-//     .get("text")
+//   const accessToken = fetchStubArgs.text
 //     .split("verify?token=")[1]
 //     .split(".")[0];
 

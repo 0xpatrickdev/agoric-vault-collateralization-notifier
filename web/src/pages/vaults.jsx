@@ -25,7 +25,13 @@ const Vaults = () => {
   return (
     <>
       {!wallet ? (
-        <Empty onClick={connectHandler} />
+        <Empty
+          title="No Wallet Connection"
+          description="Connect your wallet to get started."
+          buttonText="Connect Wallet"
+          graphic="vault"
+          onClick={connectHandler}
+        />
       ) : vaults.length ? (
         <VaultList
           vaults={vaults}
@@ -36,6 +42,7 @@ const Vaults = () => {
           title="No Vaults Found"
           description="Notifications can be created without a wallet connection."
           buttonText="Create Notification"
+          graphic="vault"
           onClick={() => navigate("/notifications")}
         />
       )}

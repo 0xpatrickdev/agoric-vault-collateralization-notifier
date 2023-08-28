@@ -123,7 +123,7 @@ export async function handleQuote(path, value) {
   }
 }
 
-export async function handleVbankAssets(_, value) {
+export async function handleVbankAssets(_path, value) {
   try {
     const promises = value.map(([_denom, { displayInfo, brand, issuerName }]) =>
       insertOrReplaceBrand({

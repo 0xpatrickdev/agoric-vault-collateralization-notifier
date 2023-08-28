@@ -39,8 +39,7 @@ test.beforeEach(async (t) => {
     body: {
       token: t.context.postStub
         .getCall(0)
-        .args[1].body.get("text")
-        .split("verify?token=")[1]
+        .args[1].text.split("verify?token=")[1]
         .split(".")[0],
     },
   });

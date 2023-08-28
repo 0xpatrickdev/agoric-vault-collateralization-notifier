@@ -3,11 +3,12 @@ import {
   getUserByToken,
   markUserVerified,
 } from "../services/db/index.js";
-import { sendVerifyEmail } from "../services/email.js";
+import { sendEmail } from "../services/email.js";
 import { generateToken } from "../services/encryption.js";
 import { isValidEmail } from "../utils/isValidEmail.js";
 import { THIRTY_MINUTES_IN_MS } from "../utils/constants.js";
 import { getEnvVar } from "../utils/getEnvVar.js";
+import { getVerifyEmailTemplate } from "../utils/emailTemplates.js";
 
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "30d";
 
@@ -18,21 +19,21 @@ export const auth = (fastify, _, done) => {
     // validate email
     const { email } = request.body;
     if (!isValidEmail(email)) {
-      return reply.status(400).send({ error: "Invalid email address." });
+      return reply.status(400).send({ error: "Email address is invalid." });
     }
 
     // generate access token and send via email
     const token = generateToken();
     try {
-      await sendVerifyEmail(email, token);
+      await sendEmail({
+        email,
+        ...getVerifyEmailTemplate(token),
+      });
     } catch (e) {
-      console.warn("Email service error", e.message);
-      console.log("auth token", token); // for testing
-      // disabled for development/testing purposes
-      // return reply.status(500).send({
-      //   error:
-      //     "Error sending email. Please try again or use a different address.",
-      // });
+      return reply.status(500).send({
+        error:
+          "Error sending email. Please try again or use a different address.",
+      });
     }
 
     // save user + token in database
