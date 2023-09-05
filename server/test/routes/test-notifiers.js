@@ -86,7 +86,7 @@ test("notifier user input sanitization", async (t) => {
       headers: t.context.headers,
     });
     t.is(response.statusCode, 400);
-    t.deepEqual(await response.json(), { error }, error);
+    t.deepEqual(await response.json(), { message: error }, error);
   };
 
   const testCases = [
@@ -109,7 +109,7 @@ test("unauthorized user cannot create notifiers", async (t) => {
     body,
   });
   t.is(postResponse.statusCode, 401);
-  t.deepEqual(await postResponse.json(), { error: "Unauthorized" });
+  t.deepEqual(await postResponse.json(), { message: "Unauthorized" });
 });
 
 test("unauthorized user cannot read notifiers", async (t) => {
@@ -118,7 +118,7 @@ test("unauthorized user cannot read notifiers", async (t) => {
     url: "notifiers",
   });
   t.is(readResponse.statusCode, 401);
-  t.deepEqual(await readResponse.json(), { error: "Unauthorized" });
+  t.deepEqual(await readResponse.json(), { message: "Unauthorized" });
 });
 
 test("user can retrieve their own notifiers", async (t) => {

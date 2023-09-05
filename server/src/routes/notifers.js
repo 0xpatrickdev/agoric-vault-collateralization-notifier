@@ -25,9 +25,9 @@ export const notifiers = (fastify, _, done) => {
     try {
       await request.jwtVerify();
       if (!request.user.userId)
-        reply.status(500).send({ error: "Unexpected error." });
+        reply.status(500).send({ message: "Unexpected error." });
     } catch (err) {
-      reply.status(401).send({ error: "Unauthorized" });
+      reply.status(401).send({ message: "Unauthorized" });
     }
   });
 
@@ -38,17 +38,17 @@ export const notifiers = (fastify, _, done) => {
       if (!isNaturalNumber(vaultManagerId))
         return reply
           .status(400)
-          .send({ error: "Vault Manager ID must be a positive integer" });
+          .send({ message: "Vault Manager ID must be a positive integer" });
 
       if (!isNaturalNumber(vaultId))
         return reply
           .status(400)
-          .send({ error: "Vault ID must be a positive integer" });
+          .send({ message: "Vault ID must be a positive integer" });
 
       if (!isNumber(collateralizationRatio))
         return reply
           .status(400)
-          .send({ error: "collateralizationRatio must be a number" });
+          .send({ message: "collateralizationRatio must be a number" });
 
       // ensure vault exists and is active, then add to db
       const vaultExistsInDb = await checkVaultExists(vaultManagerId, vaultId);
@@ -60,12 +60,13 @@ export const notifiers = (fastify, _, done) => {
           vaultData = await abciQuery(vaultPath);
         } catch (e) {
           if (e.message.includes("could not get vstorage path")) {
-            return reply.status(400).send({ error: "Vault does not exist" });
-          } else return reply.status(500).send({ error: "Unexpected error." });
+            return reply.status(400).send({ message: "Vault does not exist" });
+          } else
+            return reply.status(500).send({ message: "Unexpected error." });
         }
         const vault = vaultFromVaultState(vaultPath, vaultData);
         if (vault.state === "liquidated" || vault.state === "closed") {
-          return reply.status(400).send({ error: "Vault is inactive." });
+          return reply.status(400).send({ message: "Vault is inactive." });
         }
         await insertOrReplaceVault(vault);
 
@@ -79,7 +80,7 @@ export const notifiers = (fastify, _, done) => {
           try {
             quoteData = await abciQuery(quotePath);
           } catch (e) {
-            return reply.status(500).send({ error: "Unexpected error." });
+            return reply.status(500).send({ message: "Unexpected error." });
           }
           const quote = quoteFromQuoteState(quotePath, quoteData);
           await insertOrReplaceQuote({
@@ -103,7 +104,7 @@ export const notifiers = (fastify, _, done) => {
       vstorageWatcher.watchPath(vaultPath, "vault");
     } catch (e) {
       console.error(e);
-      return reply.status(500).send({ error: "Unexpected error." });
+      return reply.status(500).send({ message: "Unexpected error." });
     }
   });
 
@@ -114,7 +115,7 @@ export const notifiers = (fastify, _, done) => {
       notifiers = await getNotifiersByUser(userId);
     } catch (err) {
       console.error(err);
-      return reply.status(500).send({ error: "Unexpected error." });
+      return reply.status(500).send({ message: "Unexpected error." });
     }
     return notifiers;
   });
@@ -134,7 +135,7 @@ export const notifiers = (fastify, _, done) => {
       reply.send({ success: true });
     } catch (err) {
       console.error(err);
-      return reply.status(500).send({ error: "Unexpected error." });
+      return reply.status(500).send({ message: "Unexpected error." });
     }
   });
 
