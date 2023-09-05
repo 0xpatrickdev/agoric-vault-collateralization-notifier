@@ -11,9 +11,10 @@ export const AuthContextProvider = ({ children }) => {
     return isLoggedIn === "true";
   });
 
-  const setIsLoggedIn = async () => {
-    window?.localStorage.setItem("isLoggedIn", "true");
-    _setIsLoggedIn(true);
+  /** @param {boolean} isLoggedIn */
+  const setIsLoggedIn = async (isLoggedIn) => {
+    window?.localStorage.setItem("isLoggedIn", isLoggedIn ? "true" : "false");
+    _setIsLoggedIn(!!isLoggedIn);
   };
 
   const register = async (email) => {

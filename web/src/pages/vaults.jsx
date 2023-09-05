@@ -6,7 +6,7 @@ import { useChain } from "../contexts/chain";
 
 const Vaults = () => {
   const { connectWallet, wallet } = useWallet();
-  const { vaults } = useChain();
+  const { userVaults } = useChain();
   const navigate = useNavigate();
 
   const connectHandler = () => {
@@ -32,9 +32,9 @@ const Vaults = () => {
           graphic="vault"
           onClick={connectHandler}
         />
-      ) : vaults.length ? (
+      ) : userVaults.length ? (
         <VaultList
-          vaults={vaults}
+          vaults={userVaults}
           handleCreateNotifier={handleCreateNotifier}
         />
       ) : (

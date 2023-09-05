@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { AgoricChainStoragePathKind as Kind } from "@agoric/rpc";
 import isEqual from "lodash/isEqual";
 import {
@@ -8,6 +8,7 @@ import {
 } from "../lib/vstoragePaths";
 import { useNetwork } from "./network";
 import { useWallet } from "./wallet";
+import { brandToString } from "../utils/brandToString";
 
 const ChainContext = createContext();
 
@@ -22,7 +23,7 @@ export const ChainContextProvider = ({ children }) => {
   const [quotes, setQuotes] = useState({});
   const [vaults, setVaults] = useState([]);
   const [vaultIds, setVaultIds] = useState({});
-  const [userVaults, setUserVaults] = useState({});
+  const [userVaultMap, setUserVaultMap] = useState({});
   const { wallet } = useWallet();
   const [currWallet, setCurrWallet] = useState(undefined);
 
@@ -34,7 +35,7 @@ export const ChainContextProvider = ({ children }) => {
       setQuotes({});
       setVaults([]);
       setVaultIds({});
-      setUserVaults({});
+      setUserVaultMap({});
       setCurrWallet(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,14 +83,14 @@ export const ChainContextProvider = ({ children }) => {
             if (vault) {
               const vaultId = `vault${vaultIdFromPath(vault)}`;
               const managerId = `manager${managerIdFromPath(vault)}`;
-              watchVault(managerId.slice(-1), vaultId.slice(-1)); // effect
+              watchVault(managerId.slice(7), vaultId.slice(5), true); // effect
               if (!acc[managerId]) acc[managerId] = [vaultId];
               else acc[managerId].push(vaultId);
               return acc;
             }
             return acc;
-          }, []);
-          setUserVaults(vaults);
+          }, {});
+          setUserVaultMap(vaults);
         }
       );
     }
@@ -116,7 +117,7 @@ export const ChainContextProvider = ({ children }) => {
         watcher.watchLatest(
           [Kind.Data, `published.vaultFactory.managers.${id}.metrics`],
           (data) => {
-            const { brand } = data.retainedCollateral;
+            const brand = brandToString(data.retainedCollateral.brand);
             if (isEqual(brand, managerBrands[id])) return;
             setManagerBrands((curr) =>
               Object.assign({}, curr, { [id]: brand })
@@ -128,39 +129,95 @@ export const ChainContextProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [managerIds]);
 
-  const watchVault = (managerId, vaultId) => {
-    if (!vaults.find((x) => x.id === vaultId && x.managerId === managerId)) {
+  const watchVault = (managerId, vaultId, owned) => {
+    if (
+      !vaults.find((x) => x.vaultId === vaultId && x.managerId === managerId)
+    ) {
       watcher.watchLatest(
         [Kind.Data, makeVaultPath(managerId, vaultId)],
         (data) => {
           const currentIdx = vaults.findIndex(
-            (x) => x.id === vaultId && x.managerId === managerId
+            (x) => x.vaultId === vaultId && x.managerId === managerId
           );
           if (currentIdx >= 0) {
-            const { vaultId, managerId, ...rest } = vaults[currentIdx];
+            const {
+              vaultId,
+              managerId,
+              owned: _owned,
+              ...rest
+            } = vaults[currentIdx];
             if (isEqual(data, rest)) return;
             const updated = [...vaults];
-            updated[currentIdx] = { ...data, vaultId, managerId };
+            updated[currentIdx] = {
+              ...data,
+              vaultId,
+              managerId,
+              owned: !!owned,
+            };
             setVaults(updated);
           } else {
-            setVaults((prev) => [...prev, { ...data, vaultId, managerId }]);
+            setVaults((prev) => [
+              ...prev,
+              { ...data, vaultId, managerId, owned: !!owned },
+            ]);
           }
         }
       );
     }
   };
 
+  const vaultManagerOpts = useMemo(
+    () =>
+      Object.entries(managerBrands)
+        .map(([managerKey, brand]) => ({
+          managerKey,
+          managerId: managerKey.slice(7),
+          brand,
+        }))
+        .filter(({ managerKey }) => vaultIds[managerKey]?.length > 0),
+    [managerBrands, vaultIds]
+  );
+
+  const vaultOptsMap = useMemo(
+    () =>
+      Object.keys(vaultIds).reduce((optsMap, managerId) => {
+        optsMap[managerId] = vaultIds[managerId]
+          .map((vaultId) => ({
+            managerKey: managerId,
+            managerId: managerId.slice(7),
+            vaultKey: vaultId,
+            vaultId: vaultId.slice(5),
+            brand: managerBrands[managerId],
+            owned: !!(
+              userVaultMap[managerId] &&
+              userVaultMap[managerId].includes(vaultId)
+            ),
+          }))
+          .sort((a, b) => {
+            if (a.owned !== b.owned) return a.owned ? -1 : 1;
+            return Number(a.vaultId) - Number(b.vaultId);
+          });
+        return optsMap;
+      }, {}),
+    [vaultIds, managerBrands, userVaultMap]
+  );
+
+  const userVaults = useMemo(
+    () => vaults.filter((vault) => vault.owned),
+    [vaults]
+  );
+
   return (
     <ChainContext.Provider
       value={{
         brands,
         quotes,
-        managerIds,
         vaults,
         watchVault,
-        userVaults,
-        vaultIds,
         managerBrands,
+        vaultManagerOpts,
+        vaultOptsMap,
+        userVaults,
       }}
     >
       {children}

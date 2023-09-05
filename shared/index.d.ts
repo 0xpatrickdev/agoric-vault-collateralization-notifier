@@ -47,5 +47,4 @@ export interface AgoricChainStoragePathKind {
   Data: string;
 }
 
-
-export type NetName = "local" | "devnet" | "ollinet" | "emerynet" | "mainnet";
+export type NetName = "local" | "devnet" | "ollinet" | "emerynet" | "main";

@@ -116,7 +116,7 @@ EmailModal.defaultProps = {
   inputLabel: "Email",
   buttonLabel: "Submit",
   description:
-    "Your email address is only used to send you notifications. A magic link will be sent to your email for verifcation and passwordless authentication.",
+    "Your email address is only used to send notifications configured in the next step. A magic link will be sent to your email for verifcation and passwordless authentication.",
 };
 
 export { EmailModal };

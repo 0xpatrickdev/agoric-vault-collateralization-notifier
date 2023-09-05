@@ -1,12 +1,19 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { makeAgoricChainStorageWatcher } from "@agoric/rpc";
 import { getNetworkConfig } from "../lib/getNetworkConfig";
 
 const NetworkContext = createContext();
 
+const getNameName = (netName) =>
+  ["local" | "devnet" | "ollinet" | "emerynet" | "main"].includes(netName)
+    ? netName
+    : "main";
+
 export const NetworkContextProvider = ({ children }) => {
   /** @type {import('@shared/types').NetName} */
-  const [netName, setNameName] = useState("devnet");
+  const { network } = useParams();
+  const [netName, setNameName] = useState(getNameName(network));
   const [networkConfig, setNetworkConfig] = useState(undefined);
   const [error, setError] = useState(undefined);
 
@@ -17,6 +24,13 @@ export const NetworkContextProvider = ({ children }) => {
       networkConfig.chainName
     );
   }
+
+  useEffect(() => {
+    if (network && network !== netName) {
+      const newNetName = getNameName(network);
+      if (newNetName !== netName) setNameName(newNetName);
+    }
+  }, [network, netName]);
 
   useEffect(() => {
     if (networkConfig?.netName !== netName)
