@@ -1,9 +1,9 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { makeAgoricChainStorageWatcher } from "@agoric/rpc";
 import { getNetworkConfig } from "../lib/getNetworkConfig";
 
-const NetworkContext = createContext();
+export const NetworkContext = createContext();
 
 const getNameName = (netName) =>
   ["local" | "devnet" | "ollinet" | "emerynet" | "main"].includes(netName)
@@ -67,9 +67,4 @@ export const NetworkContextProvider = ({ children }) => {
       {children}
     </NetworkContext.Provider>
   );
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useNetwork = () => {
-  return useContext(NetworkContext);
 };

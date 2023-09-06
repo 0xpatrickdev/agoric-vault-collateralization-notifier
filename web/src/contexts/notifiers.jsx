@@ -1,12 +1,12 @@
-import { createContext, useContext, useCallback, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import {
   createNotifier,
   getNotifiers as getNotifiersReq,
   deleteNotifier,
 } from "../lib/api";
-import { useAuth } from "../contexts/auth";
+import { useAuth } from "../hooks/auth";
 
-const NotifierContext = createContext();
+export const NotifierContext = createContext();
 
 export const NotifierContextProvider = ({ children }) => {
   /** @type {undefined | [] | Array<import('@shared/types').Notifier>} */
@@ -72,9 +72,4 @@ export const NotifierContextProvider = ({ children }) => {
       {children}
     </NotifierContext.Provider>
   );
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useNotifiers = () => {
-  return useContext(NotifierContext);
 };

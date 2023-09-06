@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { AgoricChainStoragePathKind as Kind } from "@agoric/rpc";
 import isEqual from "lodash/isEqual";
 import {
@@ -6,11 +6,12 @@ import {
   managerIdFromPath,
   makeVaultPath,
 } from "../lib/vstoragePaths";
-import { useNetwork } from "./network";
-import { useWallet } from "./wallet";
+import { useNetwork } from "../hooks/network";
+import { useWallet } from "../hooks/wallet";
 import { brandToString } from "../utils/brandToString";
+import { displayPrice } from "../utils/formatters";
 
-const ChainContext = createContext();
+export const ChainContext = createContext();
 
 export const ChainContextProvider = ({ children }) => {
   const paths = new Set();
@@ -104,7 +105,12 @@ export const ChainContextProvider = ({ children }) => {
           [Kind.Data, `published.vaultFactory.managers.${id}.quotes`],
           (data) => {
             if (isEqual(data, quotes[id])) return;
-            setQuotes((curr) => Object.assign({}, curr, { [id]: data }));
+            const formattedQuote = Object.assign({}, data, {
+              displayPrice: displayPrice(data.quoteAmount.value[0], 2, brands),
+            });
+            setQuotes((curr) =>
+              Object.assign({}, curr, { [id]: formattedQuote })
+            );
           }
         );
         watcher.watchLatest(
@@ -223,9 +229,4 @@ export const ChainContextProvider = ({ children }) => {
       {children}
     </ChainContext.Provider>
   );
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useChain = () => {
-  return useContext(ChainContext);
 };

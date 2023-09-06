@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { EnvelopeIcon } from "@heroicons/react/20/solid";
-import { useAuth } from "../contexts/auth";
+import { useAuth } from "../hooks/auth";
 import Empty from "../components/empty";
 import { ConnectedEmailModal } from "../components/connectedEmailModal";
 

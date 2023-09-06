@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import Empty from "../components/empty";
 import { VaultList } from "../components/vaultList";
-import { useWallet } from "../contexts/wallet";
-import { useChain } from "../contexts/chain";
+import { useWallet } from "../hooks/wallet";
+import { useChain } from "../hooks/chain";
 
 const Vaults = () => {
   const { connectWallet, wallet } = useWallet();

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EmailModal } from "../components/emailModal";
-import { useAuth } from "../contexts/auth";
+import { useAuth } from "../hooks/auth";
 
 const ConnectedEmailModal = ({ visible, setIsVisible }) => {
   const [validationError, setValidationError] = useState(undefined);

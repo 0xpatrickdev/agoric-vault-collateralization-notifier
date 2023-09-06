@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NotifierModal } from "../components/notifierModal";
-import { useChain } from "../contexts/chain";
-import { useNotifiers } from "../contexts/notifiers";
+import { useChain } from "../hooks/chain";
+import { useNotifiers } from "../hooks/notifiers";
 
 const ConnectedNotifierModal = ({ visible, setIsVisible, onSuccess }) => {
   const [selectedManager, setSelectedManager] = useState(null);

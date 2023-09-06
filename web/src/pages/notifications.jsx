@@ -4,8 +4,8 @@ import Empty from "../components/empty";
 import { ConnectedEmailModal } from "../components/connectedEmailModal";
 import { ConnectedNotifierModal } from "../components/connectedNotifierModal";
 import { NotifierList } from "../components/notifierList";
-import { useAuth } from "../contexts/auth";
-import { useNotifiers } from "../contexts/notifiers";
+import { useAuth } from "../hooks/auth";
+import { useNotifiers } from "../hooks/notifiers";
 
 const Notifications = () => {
   const [showLogin, setShowLogin] = useState(false);

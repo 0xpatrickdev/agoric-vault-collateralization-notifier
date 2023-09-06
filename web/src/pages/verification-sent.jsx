@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Empty from "../components/empty";
-import { useAuth } from "../contexts/auth";
+import { useAuth } from "../hooks/auth";
 
 const Verify = () => {
   const { isLoggedIn } = useAuth();
