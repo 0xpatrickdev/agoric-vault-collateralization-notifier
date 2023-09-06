@@ -3,7 +3,12 @@ import { NotifierModal } from "../components/notifierModal";
 import { useChain } from "../hooks/chain";
 import { useNotifiers } from "../hooks/notifiers";
 
-const ConnectedNotifierModal = ({ visible, setIsVisible, onSuccess }) => {
+const ConnectedNotifierModal = ({
+  visible,
+  setIsVisible,
+  onSuccess,
+  initialValues,
+}) => {
   const [selectedManager, setSelectedManager] = useState(null);
   const [validationError, setValidationError] = useState(null);
   const { vaultManagerOpts, vaultOptsMap, watchVault } = useChain();
@@ -28,6 +33,19 @@ const ConnectedNotifierModal = ({ visible, setIsVisible, onSuccess }) => {
     watchVault(managerId, vaultId);
   };
 
+  const initialManagerValue = initialValues?.managerId
+    ? vaultManagerOpts.find(
+        ({ managerId }) => managerId === initialValues.managerId
+      )
+    : null;
+
+  const initialVaultValue =
+    initialManagerValue && initialValues?.vaultId
+      ? vaultOptsMap[initialManagerValue.managerKey].find(
+          ({ vaultId }) => vaultId === initialValues.vaultId
+        )
+      : null;
+
   return (
     <NotifierModal
       handleSubmit={handleCreateNotifier}
@@ -38,6 +56,8 @@ const ConnectedNotifierModal = ({ visible, setIsVisible, onSuccess }) => {
       onManagerChange={handleManagerChange}
       onVaultChange={handleVaultChange}
       validationError={validationError}
+      initialManagerOption={initialManagerValue}
+      initialVaultOption={initialVaultValue}
     />
   );
 };

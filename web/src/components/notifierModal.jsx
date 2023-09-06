@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ComboBox } from "../components/comboBox";
 import { PercentInput } from "../components/percentInput";
@@ -15,9 +15,11 @@ const NotifierModal = ({
   vaultOptions,
   onManagerChange,
   onVaultChange,
+  initialManagerOption,
+  initialVaultOption,
 }) => {
-  const [manager, setManager] = useState(null);
-  const [vault, setVault] = useState(null);
+  const [manager, setManager] = useState(initialManagerOption);
+  const [vault, setVault] = useState(initialVaultOption);
   const [percentTouched, setPercentTouched] = useState(false);
   const cancelButtonRef = useRef(null);
   const percentRef = useRef(null);
@@ -44,6 +46,16 @@ const NotifierModal = ({
     setVault(manager);
     onVaultChange(manager);
   };
+
+  useEffect(() => {
+    if (!manager && initialManagerOption) {
+      handleManagerChange(initialManagerOption);
+    }
+    if (!vault && initialVaultOption) {
+      handleVaultChange(initialVaultOption);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialManagerOption, initialVaultOption]);
 
   return (
     <Transition.Root show={visible} as={Fragment}>
@@ -102,7 +114,7 @@ const NotifierModal = ({
                       prelineKey="brand"
                       displayKey="managerKey"
                       onChange={handleManagerChange}
-                      initialValue={manager}
+                      initialValue={initialManagerOption}
                     />
                   </div>
                   <div className="w-full sm:max-w-xs mb-2">
@@ -113,7 +125,7 @@ const NotifierModal = ({
                       valueKey="vaultKey"
                       displayKey="vaultKey"
                       onChange={handleVaultChange}
-                      initialValue={vault}
+                      initialValue={initialVaultOption}
                     />
                   </div>
                   <div className="w-full sm:max-w-xs mb-2">

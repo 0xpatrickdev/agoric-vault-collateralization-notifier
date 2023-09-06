@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { BellAlertIcon, EnvelopeIcon } from "@heroicons/react/20/solid";
 import Empty from "../components/empty";
 import { ConnectedEmailModal } from "../components/connectedEmailModal";
@@ -11,8 +12,10 @@ const Notifications = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [notifiers, setNotifiers] = useState([]);
   const [showCreateNotifier, setShowCreateNotifier] = useState(false);
+  const [initialNotifierValues, setInitialNotifierValues] = useState(null);
   const { isLoggedIn } = useAuth();
   const { getNotifiers, remove } = useNotifiers();
+  const [searchParams] = useSearchParams();
 
   const handleNotifierCreated = () => {
     fetchNotifiers(true);
@@ -27,6 +30,21 @@ const Notifications = () => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (
+      searchParams.has("managerId") &&
+      searchParams.has("vaultId") &&
+      searchParams.get("action") === "create"
+    ) {
+      setInitialNotifierValues({
+        managerId: searchParams.get("managerId"),
+        vaultId: searchParams.get("vaultId"),
+      });
+      // ...add delay for rpc data to load
+      setTimeout(() => setShowCreateNotifier(true), 1500);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => fetchNotifiers(), 500);
@@ -72,6 +90,7 @@ const Notifications = () => {
             visible={showCreateNotifier}
             setIsVisible={setShowCreateNotifier}
             onSuccess={handleNotifierCreated}
+            initialValues={initialNotifierValues}
           />
         </>
       ) : (
