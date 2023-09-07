@@ -19,7 +19,7 @@ export const auth = (fastify, _, done) => {
     // validate email
     const { email } = request.body;
     if (!isValidEmail(email)) {
-      return reply.status(400).send({ error: "Email address is invalid." });
+      return reply.status(400).send({ message: "Email address is invalid." });
     }
 
     // generate access token and send via email
@@ -31,7 +31,7 @@ export const auth = (fastify, _, done) => {
       });
     } catch (e) {
       return reply.status(500).send({
-        error:
+        message:
           "Error sending email. Please try again or use a different address.",
       });
     }
@@ -53,26 +53,26 @@ export const auth = (fastify, _, done) => {
     try {
       user = await getUserByToken(token);
     } catch (err) {
-      return reply.status(500).send({ error: "Unexpected error occured." });
+      return reply.status(500).send({ message: "Unexpected error occured." });
     }
 
     // if user not found, send an error
     if (!user) {
-      return reply.status(400).send({ error: "Unexpected error occured." });
+      return reply.status(400).send({ message: "Unexpected error occured." });
     }
 
     // check if token is expired
     if (Date.now() > user.tokenExpiry) {
       return reply
         .status(400)
-        .send({ error: "Token expired. Please register again." });
+        .send({ message: "Token expired. Please register again." });
     }
 
     // set user `verified` to true (1)
     try {
       await markUserVerified(user.id);
     } catch (err) {
-      return reply.status(500).send({ error: "Unexpected error occured." });
+      return reply.status(500).send({ message: "Unexpected error occured." });
     }
 
     // Generate a JWT and send success message
@@ -88,7 +88,7 @@ export const auth = (fastify, _, done) => {
         sameSite: "Strict",
         path: "/",
       })
-      .send({ success: true });
+      .send({ ok: true });
   });
 
   done();

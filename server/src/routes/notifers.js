@@ -98,7 +98,7 @@ export const notifiers = (fastify, _, done) => {
         collateralizationRatio,
       });
 
-      reply.send({ success: true });
+      reply.send({ ok: true });
 
       vstorageWatcher.watchPath(quotePath, "quote");
       vstorageWatcher.watchPath(vaultPath, "vault");
@@ -132,7 +132,7 @@ export const notifiers = (fastify, _, done) => {
         vstorageWatcher.removePath(path);
       }
       // @todo can check for quote followers to stop, but probably not necessary rn
-      reply.send({ success: true });
+      reply.send({ ok: true });
     } catch (err) {
       console.error(err);
       return reply.status(500).send({ message: "Unexpected error." });

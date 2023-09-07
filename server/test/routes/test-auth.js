@@ -52,7 +52,7 @@ test("register throws an error when an invalid email is provided", async (t) => 
     },
   });
   t.is(response.statusCode, 400);
-  t.deepEqual(await response.json(), { error: "Email address is invalid." });
+  t.deepEqual(await response.json(), { message: "Email address is invalid." });
 });
 
 test("register returns 200 when valid email is provided", async (t) => {
@@ -99,7 +99,7 @@ test("verify returns 200 with a valid access token", async (t) => {
   });
 
   t.is(verifyResponse.statusCode, 200);
-  t.deepEqual(await verifyResponse.json(), { success: true });
+  t.deepEqual(await verifyResponse.json(), { ok: true });
   t.truthy(
     verifyResponse.headers["set-cookie"].includes("HttpOnly"),
     "Authorization header is set"
@@ -136,7 +136,7 @@ test("verify returns 400 with a invalid access token", async (t) => {
   });
   t.is(verifyResponse1.statusCode, 400);
   t.deepEqual(verifyResponse1.json(), {
-    error: "Unexpected error occured.",
+    message: "Unexpected error occured.",
   });
 });
 

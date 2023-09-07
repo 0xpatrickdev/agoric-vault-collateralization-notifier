@@ -32,5 +32,5 @@ test("health check returns 200", async (t) => {
     url: "health-check",
   });
   t.is(response.statusCode, 200);
-  t.deepEqual(await response.json(), { success: true });
+  t.deepEqual(await response.json(), { ok: true });
 });

@@ -68,7 +68,7 @@ test("user can create notifiers", async (t) => {
     headers: t.context.headers,
   });
   t.is(response.statusCode, 200);
-  t.deepEqual(await response.json(), { success: true });
+  t.deepEqual(await response.json(), { ok: true });
 });
 
 test("notifier user input sanitization", async (t) => {
