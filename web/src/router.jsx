@@ -1,6 +1,6 @@
 import { redirect, createBrowserRouter } from "react-router-dom";
 import Layout from "./layout";
-import Notifications from "./pages/notifications";
+import Notifiers from "./pages/notifiers";
 import Vaults from "./pages/vaults";
 import Verify from "./pages/verify";
 import Error from "./pages/error";
@@ -8,7 +8,7 @@ import VerificationSent from "./pages/verification-sent";
 
 const routes = [
   { name: "My Vaults", to: "/vaults" },
-  { name: "My Notifications", to: "/notifications" },
+  { name: "My Notifiers", to: "/notifiers" },
 ];
 
 const router = createBrowserRouter([
@@ -29,8 +29,8 @@ const router = createBrowserRouter([
         element: <Vaults />,
       },
       {
-        path: "notifications",
-        element: <Notifications />,
+        path: "notifiers",
+        element: <Notifiers />,
       },
       {
         path: "verification-sent",

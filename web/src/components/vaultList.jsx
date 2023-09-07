@@ -1,60 +1,53 @@
 import { useChain } from "../hooks/chain";
 import { getFormattedVault } from "../utils/getFormattedVault";
+import { capitalize } from "../utils/capitalize";
 
 const VaultList = ({ vaults, handleCreateNotifier }) => {
-  const { brands, quotes } = useChain();
+  const { brands, quotes, managerGovParams } = useChain();
+
   const renderColumns = () => (
     <tr>
       <th
         scope="col"
-        className="py-3.5 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6 lg:pl-8"
+        className="py-3.5 pl-1 text-center text-sm font-normal text-gray-500 sm:pl-6 lg:pl-8 break-normal w-[135px]"
+        valign="bottom"
       >
         Vault Id
       </th>
+      {[
+        "Status",
+        "Collateral Brand",
+        "Collateral Amount",
+        "Oracle Price",
+        "Collateral Value",
+        "Debt Amount",
+        "Current Collateral Ratio",
+      ].map((label) => (
+        <th
+          key={label}
+          scope="col"
+          className="px-3 py-3.5 text-right text-sm font-normal text-gray-500 break-normal max-w-[135px]"
+          valign="bottom"
+        >
+          {label}
+        </th>
+      ))}
+      {["Minimum Collateral Ratio", "Liquidation Ratio"].map((label) => (
+        <th
+          key={label}
+          scope="col"
+          className="px-3 py-3.5 text-right text-sm font-normal text-gray-500 break-normal max-w-[135px] bg-gray-100"
+          valign="bottom"
+        >
+          {label}
+        </th>
+      ))}
       <th
         scope="col"
-        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+        className="relative py-3.5 pr-4 sm:pr-4 lg:pr-6 min-w-[132px]"
+        valign="bottom"
       >
-        Status
-      </th>
-      <th
-        scope="col"
-        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-      >
-        Collateral Brand
-      </th>
-      <th
-        scope="col"
-        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-      >
-        Collateral Amount
-      </th>
-      <th
-        scope="col"
-        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-      >
-        Oracle Price
-      </th>
-      <th
-        scope="col"
-        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-      >
-        Collateral Value
-      </th>
-      <th
-        scope="col"
-        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-      >
-        Debt Amount
-      </th>
-      <th
-        scope="col"
-        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-      >
-        Collateralization Ratio
-      </th>
-      <th scope="col" className="relative py-3.5 pr-4 sm:pr-4 lg:pr-6">
-        <span className="sr-only">Edit</span>
+        <span className="sr-only">Create Notifier</span>
       </th>
     </tr>
   );
@@ -69,36 +62,45 @@ const VaultList = ({ vaults, handleCreateNotifier }) => {
       oraclePrice,
     } = getFormattedVault(vault, brands, quotes);
 
+    const govParams = managerGovParams[`manager${vault.managerId}`];
+
     return (
       <tr key={`${vault.managerId}-${vault.vaultId}`}>
-        <td className="whitespace-nowrap pl-4 px-3 py-4 text-sm text-gray-500 sm:pl-6 lg:pl-8">
+        <td className="whitespace-nowrap pl-1 px-3 py-4 font-medium text-sm text-center text-gray-900 sm:pl-6 lg:pl-8 max-w-[135px]">
           {vault.vaultId}
         </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {vault.vaultState}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {collateralBrand}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {collateralAmountDisplay}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {oraclePrice}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {collateralValueDisplay}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {debtAmountDisplay}
-        </td>
-        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-          {collateralizationRatio}
-        </td>
+        {[
+          capitalize(vault?.vaultState),
+          collateralBrand,
+          collateralAmountDisplay,
+          oraclePrice,
+          collateralValueDisplay,
+          debtAmountDisplay,
+          collateralizationRatio,
+        ].map((value, idx) => (
+          <td
+            className="whitespace-nowrap px-3 py-4 text-sm font-medium text-right text-gray-900 max-w-[135px]"
+            key={`${value}-${idx}`}
+          >
+            {value}
+          </td>
+        ))}
+        {[govParams.collateralRatio, govParams.liquidationRatio].map(
+          (value, idx) => (
+            <th
+              key={`${value}-${idx}`}
+              scope="col"
+              className="whitespace-nowrap px-3 py-4 text-sm text-right font-medium text-gray-900 max-w-[135px] bg-gray-100"
+              valign="bottom"
+            >
+              {value}
+            </th>
+          )
+        )}
         <td className="relative whitespace-nowrap py-4 pr-4 text-right text-sm font-medium sm:pr-4 lg:pr-6">
           <button
             onClick={() => handleCreateNotifier(vault)}
-            className="text-indigo-600 hover:text-indigo-900"
+            className="text-interPurple hover:opacity-70"
           >
             Create Notifier<span className="sr-only"></span>
           </button>

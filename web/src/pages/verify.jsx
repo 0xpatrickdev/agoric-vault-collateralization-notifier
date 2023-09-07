@@ -18,7 +18,7 @@ const Verify = () => {
     setSubmittedOnce(true);
     try {
       await verifyToken(token);
-      setTimeout(() => navigate("/notifications"), 500);
+      setTimeout(() => navigate("/notifiers"), 500);
     } catch (error) {
       setError(error.message);
     }

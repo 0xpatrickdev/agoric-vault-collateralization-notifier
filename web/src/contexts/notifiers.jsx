@@ -1,17 +1,20 @@
-import { createContext, useCallback, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import {
   createNotifier,
   getNotifiers as getNotifiersReq,
   deleteNotifier,
 } from "../lib/api";
 import { useAuth } from "../hooks/auth";
+import { useChain } from "../hooks/chain";
 
 export const NotifierContext = createContext();
 
 export const NotifierContextProvider = ({ children }) => {
   /** @type {undefined | [] | Array<import('@shared/types').Notifier>} */
   const [notifiers, setNotifiers] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(undefined);
   const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const { watchVault, vaults, watcher } = useChain();
 
   /**
    * @param {string} notifierId
@@ -49,6 +52,7 @@ export const NotifierContextProvider = ({ children }) => {
       if (!isLoggedIn) return [];
       if (Array.isArray(notifiers) && !refetch) return notifiers;
       try {
+        setIsLoading(true);
         const notifiers = await getNotifiersReq();
         setNotifiers(notifiers);
         return notifiers;
@@ -56,10 +60,27 @@ export const NotifierContextProvider = ({ children }) => {
         if (e.message === "Unauthorized") {
           setIsLoggedIn(false);
         }
+      } finally {
+        setIsLoading(false);
       }
     },
     [notifiers, isLoggedIn, setIsLoggedIn]
   );
+
+  useEffect(() => {
+    if (watcher && notifiers?.length) {
+      const timer = setTimeout(
+        () =>
+          notifiers.forEach(({ vaultId, vaultManagerId }) => {
+            if (!vaults.find((v) => v.vaultId === String(vaultId))) {
+              watchVault(String(vaultManagerId), String(vaultId), false);
+            }
+          }),
+        500
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [watcher, notifiers, watchVault, vaults]);
 
   return (
     <NotifierContext.Provider
@@ -67,6 +88,7 @@ export const NotifierContextProvider = ({ children }) => {
         getNotifiers,
         create,
         remove,
+        isLoading,
       }}
     >
       {children}

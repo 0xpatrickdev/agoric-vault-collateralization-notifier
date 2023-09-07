@@ -8,7 +8,7 @@ const Verify = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoggedIn) navigate("/notifications");
+    if (isLoggedIn) navigate("/notifiers");
   }, [isLoggedIn, navigate]);
 
   return (

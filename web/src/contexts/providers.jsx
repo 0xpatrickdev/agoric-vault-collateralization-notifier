@@ -8,9 +8,9 @@ const ContextProviders = ({ children }) => (
   <NetworkContextProvider>
     <WalletContextProvider>
       <AuthContextProvider>
-        <NotifierContextProvider>
-          <ChainContextProvider>{children}</ChainContextProvider>
-        </NotifierContextProvider>
+        <ChainContextProvider>
+          <NotifierContextProvider>{children}</NotifierContextProvider>
+        </ChainContextProvider>
       </AuthContextProvider>
     </WalletContextProvider>
   </NetworkContextProvider>

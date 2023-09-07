@@ -1,5 +1,6 @@
 import { createContext, useEffect, useMemo, useState } from "react";
 import { AgoricChainStoragePathKind as Kind } from "@agoric/rpc";
+import { addRatios } from "@agoric/zoe/src/contractSupport";
 import isEqual from "lodash/isEqual";
 import {
   vaultIdFromPath,
@@ -10,6 +11,7 @@ import { useNetwork } from "../hooks/network";
 import { useWallet } from "../hooks/wallet";
 import { brandToString } from "../utils/brandToString";
 import { displayPrice } from "../utils/formatters";
+import { ratioToDisplayPercent } from "../utils/ratioToDisplayPercent";
 
 export const ChainContext = createContext();
 
@@ -20,6 +22,7 @@ export const ChainContextProvider = ({ children }) => {
   const [currChainName, setCurrChainName] = useState(undefined);
   const [brands, setBrands] = useState([]);
   const [managerBrands, setManagerBrands] = useState({});
+  const [managerGovParams, setManagerGovParams] = useState({});
   const [managerIds, setManagerIds] = useState([]);
   const [quotes, setQuotes] = useState({});
   const [vaults, setVaults] = useState([]);
@@ -38,6 +41,7 @@ export const ChainContextProvider = ({ children }) => {
       setVaultIds({});
       setUserVaultMap({});
       setCurrWallet(undefined);
+      setManagerGovParams({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainName]);
@@ -127,6 +131,27 @@ export const ChainContextProvider = ({ children }) => {
             if (isEqual(brand, managerBrands[id])) return;
             setManagerBrands((curr) =>
               Object.assign({}, curr, { [id]: brand })
+            );
+          }
+        );
+        watcher.watchLatest(
+          [Kind.Data, `published.vaultFactory.managers.${id}.governance`],
+          (data) => {
+            if (isEqual(data.current, managerGovParams[id])) return;
+            setManagerGovParams((curr) =>
+              Object.assign({}, curr, {
+                [id]: Object.assign({}, data.current, {
+                  liquidationRatio: ratioToDisplayPercent(
+                    data.current.LiquidationMargin.value
+                  ),
+                  collateralRatio: ratioToDisplayPercent(
+                    addRatios(
+                      data.current.LiquidationMargin.value,
+                      data.current.LiquidationPadding.value
+                    )
+                  ),
+                }),
+              })
             );
           }
         );
@@ -224,6 +249,8 @@ export const ChainContextProvider = ({ children }) => {
         vaultManagerOpts,
         vaultOptsMap,
         userVaults,
+        watcher,
+        managerGovParams,
       }}
     >
       {children}

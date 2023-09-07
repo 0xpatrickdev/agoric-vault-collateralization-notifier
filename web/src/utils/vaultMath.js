@@ -5,8 +5,9 @@
  * @param {number} params.debt
  * @param {number} params.quoteAmountIn
  * @param {number} params.quoteAmountOut
- * @param {boolean} params.bps return ratio in basis points
- * @returns {number} ratio rounded to nearest percent (or basis points)
+ * @param {boolean} [params.bps] return ratio in basis points
+ * @param {boolean} params.asString return ratio as a display string
+ * @returns {number|string} ratio rounded to nearest percent (or basis points)
  */
 export const calculateCollateralizationRatio = ({
   locked,
@@ -14,11 +15,16 @@ export const calculateCollateralizationRatio = ({
   quoteAmountIn,
   quoteAmountOut,
   bps = false,
+  asString,
 }) => {
   const factor = bps ? 10_000n : 100n;
-  return Number(
+  if (debt === 0n && locked === 0n) {
+    return asString ? "N/A" : new Error("debt must be greater than 0");
+  }
+  const ratio = Number(
     (BigInt(locked) * BigInt(quoteAmountOut) * factor) /
       BigInt(quoteAmountIn) /
       BigInt(debt)
   );
+  return !asString ? ratio : bps ? `${ratio / 100}%` : `${ratio}%`;
 };

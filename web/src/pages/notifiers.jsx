@@ -5,16 +5,17 @@ import Empty from "../components/empty";
 import { ConnectedEmailModal } from "../components/connectedEmailModal";
 import { ConnectedNotifierModal } from "../components/connectedNotifierModal";
 import { NotifierList } from "../components/notifierList";
+import { Loading } from "../components/loading";
 import { useAuth } from "../hooks/auth";
 import { useNotifiers } from "../hooks/notifiers";
 
-const Notifications = () => {
+const Notifiers = () => {
   const [showLogin, setShowLogin] = useState(false);
-  const [notifiers, setNotifiers] = useState([]);
+  const [notifiers, setNotifiers] = useState(undefined);
   const [showCreateNotifier, setShowCreateNotifier] = useState(false);
   const [initialNotifierValues, setInitialNotifierValues] = useState(null);
   const { isLoggedIn } = useAuth();
-  const { getNotifiers, remove } = useNotifiers();
+  const { getNotifiers, remove, isLoading } = useNotifiers();
   const [searchParams] = useSearchParams();
 
   const handleNotifierCreated = () => {
@@ -65,7 +66,9 @@ const Notifications = () => {
     <>
       {isLoggedIn ? (
         <>
-          {notifiers && notifiers.length > 0 ? (
+          {isLoading || !notifiers ? (
+            <Loading />
+          ) : notifiers.length > 0 ? (
             <NotifierList
               notifiers={notifiers}
               handleCreateNotifier={() => setShowCreateNotifier(true)}
@@ -96,7 +99,7 @@ const Notifications = () => {
       ) : (
         <>
           <Empty
-            title="No Notifications"
+            title="No Notifiers"
             description="Sign in with email to get started."
             graphic="notification"
             buttonText="Sign In"
@@ -118,4 +121,4 @@ const Notifications = () => {
   );
 };
 
-export default Notifications;
+export default Notifiers;

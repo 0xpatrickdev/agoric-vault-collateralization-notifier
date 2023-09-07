@@ -18,7 +18,7 @@ const Vaults = () => {
 
   const handleCreateNotifier = ({ managerId, vaultId }) => {
     navigate(
-      `/notifications?action=create&managerId=${managerId}&vaultId=${vaultId}`
+      `/notifiers?action=create&managerId=${managerId}&vaultId=${vaultId}`
     );
   };
 
@@ -43,7 +43,7 @@ const Vaults = () => {
           description="Notifications can be created without a wallet connection."
           buttonText="Create Notification"
           graphic="vault"
-          onClick={() => navigate("/notifications")}
+          onClick={() => navigate("/notifiers")}
         />
       )}
     </>

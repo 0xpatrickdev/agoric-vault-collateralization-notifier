@@ -57,7 +57,7 @@ export const displayPrice = (price, placesToShow, brandList, qty) => {
   const brandInDecimals = getDecimalPlaces(brandIn, brandList);
 
   const decimals = 10n ** BigInt(brandInDecimals);
-  const unitAmountOfBrandIn = AmountMath.make(brandIn, qty ? qty : decimals);
+  const unitAmountOfBrandIn = AmountMath.make(brandIn, qty ?? decimals);
 
   const brandOutAmountPerUnitOfBrandIn = floorMultiplyBy(
     unitAmountOfBrandIn,

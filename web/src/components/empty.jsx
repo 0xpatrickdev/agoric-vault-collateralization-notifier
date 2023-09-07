@@ -57,7 +57,7 @@ Empty.defaultProps = {
   buttonText: "Connect Wallet",
   graphic: "vault",
   ButtonIcon: () => (
-    <WalletIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+    <WalletIcon className="mr-1.5 h-5 w-5" aria-hidden="true" />
   ),
   onClick: undefined,
 };
