@@ -35,7 +35,7 @@ In the application, specific terminology is used to describe key concepts. These
 
 A full list of screenshots can be found in the [`docs/screenshots`](docs/screenshots) directory.
 
-https://github.com/0xpatrickdev/agoric-vault-collateralization-notifier/assets/11021913/204affa9-9bc8-4be6-972c-b1bfd20d53f7
+https://github.com/0xpatrickdev/agoric-vault-collateralization-notifier/assets/11021913/8d72ae8b-7d29-4711-9054-a3d065d97601
 
 
 ## Getting Started
