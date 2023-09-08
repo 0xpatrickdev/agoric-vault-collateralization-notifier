@@ -1,4 +1,3 @@
-import { useChain } from "../hooks/chain";
 import { getFormattedVault } from "../utils/getFormattedVault";
 import { capitalize } from "../utils/capitalize";
 import { PlusCircleIcon } from "@heroicons/react/20/solid";
@@ -7,9 +6,11 @@ const NotifierList = ({
   notifiers,
   handleCreateNotifier,
   handleDeleteNotifier,
+  brands,
+  quotes,
+  vaults,
+  managerGovParams,
 }) => {
-  const { brands, quotes, vaults, managerGovParams } = useChain();
-
   const renderColumns = () => (
     <tr>
       <th
@@ -116,7 +117,7 @@ const NotifierList = ({
         <div className="mt-4 pt-2 sm:ml-16 sm:mt-0 sm:flex-none">
           <button
             type="button"
-            className="inline-flex w-48 items-center justify-center rounded-full bg-interPurple px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interPurple"
+            className="inline-flex w-48 items-center justify-center rounded-full bg-interPurple px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interPurple shadow-sm"
             onClick={handleCreateNotifier}
           >
             <PlusCircleIcon className="mr-1.5 h-5 w-5" aria-hidden="true" />

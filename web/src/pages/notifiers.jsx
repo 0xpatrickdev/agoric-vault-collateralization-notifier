@@ -8,6 +8,7 @@ import { NotifierList } from "../components/notifierList";
 import { Loading } from "../components/loading";
 import { useAuth } from "../hooks/auth";
 import { useNotifiers } from "../hooks/notifiers";
+import { useChain } from "../hooks/chain";
 
 const Notifiers = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -17,6 +18,7 @@ const Notifiers = () => {
   const { isLoggedIn } = useAuth();
   const { getNotifiers, remove, isLoading } = useNotifiers();
   const [searchParams] = useSearchParams();
+  const { brands, quotes, vaults, managerGovParams } = useChain();
 
   const handleNotifierCreated = () => {
     fetchNotifiers(true);
@@ -73,6 +75,10 @@ const Notifiers = () => {
               notifiers={notifiers}
               handleCreateNotifier={() => setShowCreateNotifier(true)}
               handleDeleteNotifier={deleteNotifier}
+              brands={brands}
+              quotes={quotes}
+              managerGovParams={managerGovParams}
+              vaults={vaults}
             />
           ) : (
             <Empty

@@ -7,7 +7,16 @@ export const WalletContext = createContext();
 
 export const WalletContextProvider = ({ children }) => {
   const { netName } = useNetwork();
-  const [wallet, setWallet] = useState(undefined);
+  const [walletAddress, setWalletAddress] = useState(() => {
+    if (window.localStorage.getItem("walletAddress")) {
+      return window.localStorage.getItem("walletAddress");
+    }
+  });
+
+  const saveAddress = ({ address }) => {
+    window.localStorage.setItem("walletAddress", address);
+    setWalletAddress(address);
+  };
 
   const connectWallet = async () => {
     const { chainId } = await suggestChain(getNetConfigUrl(netName));
@@ -15,14 +24,14 @@ export const WalletContextProvider = ({ children }) => {
       await window.keplr.enable(chainId);
       const offlineSigner = window.getOfflineSigner(chainId);
       const accounts = await offlineSigner.getAccounts();
-      setWallet(accounts[0]);
+      saveAddress(accounts[0]);
     }
   };
 
   return (
     <WalletContext.Provider
       value={{
-        wallet,
+        walletAddress,
         connectWallet,
       }}
     >

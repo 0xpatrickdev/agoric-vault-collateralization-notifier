@@ -3,6 +3,7 @@ import { calculateCollateralizationRatio } from "./vaultMath";
 
 export const getFormattedVault = (vault, brands, quotes) => {
   const quote = quotes[`manager${vault.managerId}`];
+  if (!quote) return null;
   const collateralBrand = vault?.locked?.brand
     ?.toString()
     ?.split("Alleged: ")[1]

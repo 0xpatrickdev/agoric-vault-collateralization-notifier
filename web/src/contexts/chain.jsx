@@ -28,8 +28,8 @@ export const ChainContextProvider = ({ children }) => {
   const [vaults, setVaults] = useState([]);
   const [vaultIds, setVaultIds] = useState({});
   const [userVaultMap, setUserVaultMap] = useState({});
-  const { wallet } = useWallet();
-  const [currWallet, setCurrWallet] = useState(undefined);
+  const { walletAddress } = useWallet();
+  const [currWalletAddress, setCurrWalletAddress] = useState(undefined);
 
   useEffect(() => {
     if (currChainName !== chainName) {
@@ -40,7 +40,7 @@ export const ChainContextProvider = ({ children }) => {
       setVaults([]);
       setVaultIds({});
       setUserVaultMap({});
-      setCurrWallet(undefined);
+      setCurrWalletAddress(undefined);
       setManagerGovParams({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,11 +77,11 @@ export const ChainContextProvider = ({ children }) => {
   }, [watcher, managerIds]);
 
   useEffect(() => {
-    if (watcher && wallet?.address && wallet?.address !== currWallet?.address) {
-      setCurrWallet(wallet);
+    if (watcher && walletAddress && walletAddress !== currWalletAddress) {
+      setCurrWalletAddress(walletAddress);
       watchPath(
         Kind.Data,
-        `published.wallet.${wallet.address}.current`,
+        `published.wallet.${walletAddress}.current`,
         ({ offerToPublicSubscriberPaths }) => {
           const vaults = offerToPublicSubscriberPaths.reduce((acc, curr) => {
             const [_offerId, { vault }] = curr;
@@ -100,7 +100,7 @@ export const ChainContextProvider = ({ children }) => {
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watcher, wallet]);
+  }, [watcher, walletAddress]);
 
   useEffect(() => {
     for (const id of managerIds) {

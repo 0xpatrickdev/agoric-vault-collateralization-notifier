@@ -12,7 +12,7 @@ export const AuthContextProvider = ({ children }) => {
   });
 
   /** @param {boolean} isLoggedIn */
-  const setIsLoggedIn = async (isLoggedIn) => {
+  const setIsLoggedIn = (isLoggedIn) => {
     window?.localStorage.setItem("isLoggedIn", isLoggedIn ? "true" : "false");
     _setIsLoggedIn(!!isLoggedIn);
   };

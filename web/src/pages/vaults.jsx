@@ -5,8 +5,8 @@ import { useWallet } from "../hooks/wallet";
 import { useChain } from "../hooks/chain";
 
 const Vaults = () => {
-  const { connectWallet, wallet } = useWallet();
-  const { userVaults } = useChain();
+  const { connectWallet, walletAddress } = useWallet();
+  const { userVaults, brands, quotes, managerGovParams } = useChain();
   const navigate = useNavigate();
 
   const connectHandler = () => {
@@ -24,7 +24,7 @@ const Vaults = () => {
 
   return (
     <>
-      {!wallet ? (
+      {!walletAddress ? (
         <Empty
           title="No Wallet Connection"
           description="Connect your wallet to get started."
@@ -36,6 +36,9 @@ const Vaults = () => {
         <VaultList
           vaults={userVaults}
           handleCreateNotifier={handleCreateNotifier}
+          brands={brands}
+          quotes={quotes}
+          managerGovParams={managerGovParams}
         />
       ) : (
         <Empty

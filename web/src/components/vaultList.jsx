@@ -1,10 +1,13 @@
-import { useChain } from "../hooks/chain";
 import { getFormattedVault } from "../utils/getFormattedVault";
 import { capitalize } from "../utils/capitalize";
 
-const VaultList = ({ vaults, handleCreateNotifier }) => {
-  const { brands, quotes, managerGovParams } = useChain();
-
+const VaultList = ({
+  vaults,
+  handleCreateNotifier,
+  brands,
+  quotes,
+  managerGovParams,
+}) => {
   const renderColumns = () => (
     <tr>
       <th
@@ -53,6 +56,8 @@ const VaultList = ({ vaults, handleCreateNotifier }) => {
   );
 
   const renderRow = (vault) => {
+    const formattedVault = getFormattedVault(vault, brands, quotes);
+    if (!formattedVault) return null;
     const {
       collateralBrand,
       collateralAmountDisplay,
@@ -60,8 +65,7 @@ const VaultList = ({ vaults, handleCreateNotifier }) => {
       debtAmountDisplay,
       collateralizationRatio,
       oraclePrice,
-    } = getFormattedVault(vault, brands, quotes);
-
+    } = formattedVault;
     const govParams = managerGovParams[`manager${vault.managerId}`];
 
     return (
