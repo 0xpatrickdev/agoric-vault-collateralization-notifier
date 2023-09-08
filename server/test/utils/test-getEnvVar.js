@@ -4,7 +4,10 @@ import path from "path";
 import { getEnvVar, getEnvVars } from "../../src/utils/getEnvVar.js";
 
 test.beforeEach(async () => {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env.test"),
+    override: true,
+  });
 });
 
 test("getEnvVar() returns an environment variable", async (t) => {

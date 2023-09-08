@@ -8,3 +8,9 @@ export const getVerifyEmailTemplate = (token) => {
     text: `Click the link to verify your email: ${CALLBACK_URL}?token=${token}. Please note this link will expire in 30 minutes.`,
   };
 };
+
+/** @param {string} text email message */
+export const getNotificationTemplate = ({ brand, vaultId, collateralizationRatio }) => ({
+    subject: "Inter Vault Alert: Collateralization Level Breached",
+    text: `Your ${brand} vault #${vaultId}, has crossed below the ${collateralizationRatio}% collateralization level.`
+  });

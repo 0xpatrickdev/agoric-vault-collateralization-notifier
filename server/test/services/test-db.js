@@ -12,11 +12,18 @@ import {
   getUserByToken,
   markUserVerified,
   getUserById,
+  getNotifiersByUser,
+  setNotifierExpired,
+  insertOrReplaceQuote,
+  getLatestQuote,
 } from "../../src/services/db/index.js";
 import { FIVE_SECONDS_IN_MS } from "../../src/utils/constants.js";
 
 test.beforeEach(async (t) => {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env.test"),
+    override: true,
+  });
   resetDb();
   t.context.app = makeApp();
   t.context.db = await setupDb(initDb());
@@ -27,6 +34,7 @@ test.afterEach.always(async (t) => {
     await teardownDb();
     t.context.db = null;
   }
+  t.context.app = null;
 });
 
 test("addOrUpdateUser creates a user and getUserByToken returns it", async (t) => {
@@ -90,5 +98,40 @@ test("markUserVerified marks the user verified and removes token", async (t) => 
   t.is(dbUser1.tokenExpiry, null, "user tokenExpiry should be removed");
 });
 
-// @todo test getNotifersByUser
-// @todo test deleteNotifer
+test("setNotifierExpired marks a notifier expired", async (t) => {
+  const notifier = {
+    userId: 1,
+    vaultManagerId: 0,
+    vaultId: 1,
+    collateralizationRatio: 500,
+  };
+
+  await createNotifier(notifier);
+  const notifiers0 = await getNotifiersByUser(1);
+  t.is(notifiers0[0].expired, 0, "Notifier should not be expired to start.");
+
+  await setNotifierExpired(1);
+  const notifiers1 = await getNotifiersByUser(1);
+  t.is(notifiers1[0].expired, 1, "Notifier should be marked expired.");
+});
+
+test("getLatestQuote returns the lastest quote", async (t) => {
+  const quote = {
+    vaultManagerId: 0,
+    quoteAmountIn: 1000000,
+    quoteAmountOut: 6917094,
+    inIssuerName: "IST",
+    outIssuerName: "ATOM",
+  };
+
+  await insertOrReplaceQuote(quote);
+  const { latestTimestamp, ...rest } = await getLatestQuote(
+    quote.vaultManagerId
+  );
+  t.deepEqual(quote, rest, "Quote should be retrievable.");
+  t.truthy(latestTimestamp, "Quote should have a timestamp.");
+});
+
+test("getNotifiersByUser should return an empty array when notifiers are not found", async (t) => {
+  t.deepEqual(await getNotifiersByUser(), []);
+});

@@ -1,22 +1,16 @@
 import { makeImportContext } from "@agoric/smart-wallet/src/marshal-contexts.js";
-import { getEnvVar } from "../utils/getEnvVar.js";
+import { getEnvVar, getEnvVars } from "../utils/getEnvVar.js";
 import { makeAgoricChainStorageWatcher } from "../lib/chainStorageWatcher.js";
 import { AgoricChainStoragePathKind } from "../lib/batchQuery.js";
 
 const importContext = makeImportContext();
 
-export const getRpcAddress = async () => {
-  const response = await fetch(getEnvVar("NETWORK_CONFIG_URL"), {
-    headers: { accept: "application/json" },
-  });
-  const networkConfig = await response.json();
-  if (!networkConfig?.rpcAddrs?.[0])
-    throw new Error("Error fetching network config");
-  return networkConfig.rpcAddrs[0];
-};
-
 /** @returns {Promise<{ rpc: string, chainName: string }>}  */
 export const getNetworkConfig = async () => {
+  if (process.env.NODE_ENV === "test") {
+    const [rpc, chainName] = getEnvVars(["TEST_RPC", "TEST_CHAIN_NAME"]);
+    return { rpc, chainName };
+  }
   const response = await fetch(getEnvVar("NETWORK_CONFIG_URL"), {
     headers: { accept: "application/json" },
   });

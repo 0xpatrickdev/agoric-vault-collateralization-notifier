@@ -1,3 +1,4 @@
+/* c8 ignore start */
 /* global harden */
 import { batchVstorageQuery, keyToPath, pathToKey } from "./batchQuery.js";
 
@@ -170,3 +171,4 @@ export const makeAgoricChainStorageWatcher = (
     rpcAddr,
   };
 };
+/* c8 ignore stop */

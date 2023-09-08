@@ -13,16 +13,18 @@ import {
 import { initVstorageWatcher } from "../../src/vstorageWatcher.js";
 
 test.beforeEach(async (t) => {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env.test"),
+    override: true,
+  });
   const resp = Promise.resolve({
     status: 200,
     ok: true,
-    json: () => Promise.resolve({ data: "Mocked data" }),
   });
   t.context.postStub = sinon.stub(axios, "post").resolves(resp);
   t.context.getStub = sinon.stub(axios, "get").resolves(resp);
   resetDb();
-  t.context.app = makeApp();
+  t.context.app = makeApp({ logger: false });
   t.context.db = await setupDb(initDb());
   t.context.vstorage = await initVstorageWatcher();
 
@@ -56,6 +58,7 @@ test.afterEach.always(async (t) => {
     await teardownDb();
     t.context.db = null;
   }
+  t.context.app = null;
   t.context.vstorage = null;
 });
 
@@ -96,6 +99,8 @@ test("notifier user input sanitization", async (t) => {
       { collateralizationRatio: null },
       "collateralizationRatio must be a number",
     ],
+    [{ vaultManager: 0, vaultId: 9999999999 }, "Vault does not exist"],
+    [{ vaultManager: 0, vaultId: 3 }, "Vault is inactive"],
   ];
 
   await Promise.all(testCases.map((x) => test(...x)));

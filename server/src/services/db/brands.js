@@ -28,24 +28,6 @@ export async function insertOrReplaceBrand(brandData) {
 }
 
 /**
- * Check if a brand exists based on issuerName.
- * @param {number} issuerName
- * @returns {Promise<boolean>}
- */
-export function checkBrandExists(issuerName) {
-  return new Promise((resolve, reject) => {
-    db.get(
-      "SELECT 1 FROM Brands WHERE issuerName = ?",
-      [issuerName],
-      (err, row) => {
-        if (err) return reject(err);
-        resolve(!!row);
-      }
-    );
-  });
-}
-
-/**
  * Retrieve an issuerName from a brand
  * @param {string} brand
  * @returns {Promise<boolean>}

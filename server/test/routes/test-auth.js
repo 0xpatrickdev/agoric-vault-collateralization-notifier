@@ -13,16 +13,18 @@ import {
 import { initVstorageWatcher } from "../../src/vstorageWatcher.js";
 
 test.beforeEach(async (t) => {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env.test"),
+    override: true,
+  });
   const resp = Promise.resolve({
     status: 200,
     ok: true,
-    json: () => Promise.resolve({ data: "Mocked data" }),
   });
   t.context.postStub = sinon.stub(axios, "post").resolves(resp);
   t.context.getStub = sinon.stub(axios, "get").resolves(resp);
   resetDb();
-  t.context.app = makeApp();
+  t.context.app = makeApp({ logger: false });
   t.context.db = await setupDb(initDb());
   t.context.vstorage = await initVstorageWatcher();
   // @todo: doesn't work with SES (cannot assign readonly property .toUTCString ...)
@@ -53,6 +55,23 @@ test("register throws an error when an invalid email is provided", async (t) => 
   });
   t.is(response.statusCode, 400);
   t.deepEqual(await response.json(), { message: "Email address is invalid." });
+});
+
+test("register throws when email api is non-responsive", async (t) => {
+  t.context.postStub.restore();
+  t.context.postStub = sinon.stub(axios, "post").resolves(Promise.reject());
+  const response = await t.context.app.inject({
+    method: "POST",
+    url: "register",
+    body: {
+      email: "test@test.com",
+    },
+  });
+  t.is(response.statusCode, 500);
+  t.deepEqual(response.json(), {
+    message:
+      "Error sending email. Please try again or use a different address.",
+  });
 });
 
 test("register returns 200 when valid email is provided", async (t) => {

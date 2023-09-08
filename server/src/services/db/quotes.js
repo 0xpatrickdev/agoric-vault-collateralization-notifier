@@ -55,7 +55,7 @@ export async function insertOrReplaceQuote(quoteData) {
 export function getLatestQuote(managerId) {
   return new Promise((resolve, reject) => {
     db.get(
-      "SELECT 1 FROM Quotes WHERE vaultManagerId = ?",
+      "SELECT * FROM Quotes WHERE vaultManagerId = ?",
       [managerId],
       (err, row) => {
         if (err) return reject(err);

@@ -9,8 +9,15 @@ import {
 } from "../../src/utils/vstoragePaths.js";
 
 test.beforeEach(async (t) => {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
+    dotenv.config({
+      path: path.resolve(process.cwd(), ".env.test"),
+      override: true,
+    });
   t.context.app = makeApp(); // lockdown called here
+});
+
+test.afterEach.always((t) => {
+  t.context.app = null;
 });
 
 test("abciQuery() query vault data", async (t) => {

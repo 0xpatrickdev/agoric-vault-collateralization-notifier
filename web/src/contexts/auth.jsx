@@ -30,7 +30,7 @@ export const AuthContextProvider = ({ children }) => {
     setIsVerifying(true);
     try {
       const res = await verifyAuthToken(token);
-      if (res.success) setIsLoggedIn(true);
+      if (res.ok) setIsLoggedIn(true);
     } catch (error) {
       throw new Error("This link is invalid or expired. Please try again.");
     } finally {

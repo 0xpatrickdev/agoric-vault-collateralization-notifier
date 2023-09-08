@@ -74,12 +74,14 @@ export async function getNotifiersByUser(userId) {
 }
 
 /**
- * finds all unsent notifiers for a vaultId-vaultManagerId pair below a certain collateralization ratio
+ * Finds all unsent notifiers for a vaultId-vaultManagerId pair below a certain collateralization ratio
+ * and includes the email for the relevant user and the outIssuerName from the related Quote.
+ *
  * @param {object} opts
- * @param {number} opts.collateralizationRatio collateralization ratio
- * @param {number} opts.vaultId vault's id
- * @param {number} opts.vaultManagerId vault manager's id
- * @returns {Promise<Array<import('../../types').Notifier>>} Notifiers that meet the criteria
+ * @param {number} opts.collateralizationRatio - Collateralization ratio
+ * @param {number} opts.vaultId - Vault's id
+ * @param {number} opts.vaultManagerId - Vault manager's id
+ * @returns {Promise<Array<import('../../types').NotifierWithUserInfo>>} - Notifiers that meet the criteria with user email and outIssuerName.
  */
 export async function getNotifiersByThreshold({
   collateralizationRatio,
@@ -88,7 +90,20 @@ export async function getNotifiersByThreshold({
 }) {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT * FROM Notifiers WHERE active = 0 AND expired = 0 AND collateralizationRatio >= ? AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
+      `
+      SELECT Notifiers.*,
+             Users.email AS email,
+             Quotes.outIssuerName AS brand
+      FROM Notifiers
+      INNER JOIN Users ON Notifiers.userId = Users.id
+      INNER JOIN Quotes ON Notifiers.vaultManagerId = Quotes.vaultManagerId
+      WHERE Notifiers.active = 0
+        AND Notifiers.expired = 0
+        AND Notifiers.collateralizationRatio >= ?
+        AND Notifiers.vaultId = ?
+        AND Notifiers.vaultManagerId = ?
+      ORDER BY Notifiers.collateralizationRatio DESC
+      `,
       [collateralizationRatio, vaultId, vaultManagerId],
       (err, rows) => {
         if (err) return reject(err);

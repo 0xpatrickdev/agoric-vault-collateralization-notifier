@@ -17,7 +17,7 @@ const ConnectedNotifierModal = ({
   const handleCreateNotifier = async (params) => {
     try {
       const res = await create(params);
-      if (res && res.success) onSuccess();
+      if (res && res.ok) onSuccess();
     } catch (e) {
       setValidationError(e.message);
     }

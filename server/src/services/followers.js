@@ -9,6 +9,7 @@ import {
   getNotifiersToReset,
   getNotifiersByVaultId,
   insertOrReplaceBrand,
+  createNotification,
 } from "./db/index.js";
 import {
   makeVaultPath,
@@ -17,38 +18,68 @@ import {
 } from "../utils/vstoragePaths.js";
 import { vstorageWatcher } from "../vstorageWatcher.js";
 import { calculateCollateralizationRatio } from "../utils/vaultMath.js";
+import { getNotificationTemplate } from "../utils/emailTemplates.js";
+import { sendEmail } from "../services/email.js";
 
 /**
  * Logic to handle notifications based on collateralization ratio.
- * @param {number} collateralizationRatio - The calculated collateralization ratio.
+ * @param {number} currentCollateralizationRatio - The calculated collateralization ratio.
  * @param {number} managerId - The manager ID for context.
  * @param {number} vaultId - The vault ID for context.
  * @returns {Promise<void>}
  */
 export async function maybeSendNotification(
-  collateralizationRatio,
+  currentCollateralizationRatio,
   vaultManagerId,
   vaultId
 ) {
-  if (typeof collateralizationRatio !== "number")
-    return console.error(`Invalid ratio provided ${collateralizationRatio}`);
+  if (typeof currentCollateralizationRatio !== "number")
+    return console.error(
+      `Invalid ratio provided ${currentCollateralizationRatio}`
+    );
   const notifiers = await getNotifiersByThreshold({
-    collateralizationRatio,
+    collateralizationRatio: currentCollateralizationRatio,
     vaultManagerId,
     vaultId,
   });
 
   for (const notifier of notifiers) {
-    // @todo call email api
-    // mark Notifier as "sent" so we don't send it again
-    await updateNotifierStatus(notifier.id, 1);
-    console.log(
-      `Sending notification to userId: ${notifier.userId} for managerId: ${vaultManagerId} and vaultId: ${vaultId}`
-    );
+    const { email, brand, collateralizationRatio } = notifier;
+    // build email template
+    const { subject, text } = getNotificationTemplate({
+      brand,
+      vaultId,
+      collateralizationRatio: collateralizationRatio,
+    });
+    // create record for db
+    const notification = {
+      ...notifier,
+      collateralizationRatioActual: currentCollateralizationRatio,
+      message: text,
+      notifierId: notifier.id,
+      sentAt: new Date().getTime(),
+    };
+
+    try {
+      // store notification record in db
+      await createNotification(notification);
+      // send notification email
+      await sendEmail({ email, subject, text });
+      // mark Notifier as "sent" so we don't send it again
+      await updateNotifierStatus(notifier.id, 1);
+      console.log(
+        `Sent notification to userId: ${notifier.userId} for managerId: ${vaultManagerId} and vaultId: ${vaultId} via notifierId: ${notifier.id}.`
+      );
+    } catch (e) {
+      console.error(
+        `Error processing notification for userId:${notifier.userId}, managerId:${vaultManagerId}, vaultId:${vaultId}`,
+        e
+      );
+    }
   }
 
   const activeNotifiers = await getNotifiersToReset({
-    collateralizationRatio,
+    collateralizationRatio: currentCollateralizationRatio,
     vaultManagerId,
     vaultId,
   });
@@ -57,7 +88,7 @@ export async function maybeSendNotification(
     // mark Notifier as "inactive" so we can fire if it crosses the threshold again
     await updateNotifierStatus(notifier.id, 0);
     console.log(
-      `Resetting active status for: ${notifier.userId} for managerId: ${vaultManagerId} and vaultId: ${vaultId}`
+      `Resetting active status for: userId: ${notifier.userId} for managerId: ${vaultManagerId} and vaultId: ${vaultId} via notifierId: ${notifier.id}.`
     );
   }
 }
@@ -79,7 +110,7 @@ export async function handleVault(path, vaultData) {
 
   try {
     const { quoteAmountIn, quoteAmountOut } = await getLatestQuote(
-      vaultManagerId
+      Number(vaultManagerId)
     );
     if (!quoteAmountIn || !quoteAmountOut) throw new Error("Quote not found.");
     const ratio = calculateCollateralizationRatio({

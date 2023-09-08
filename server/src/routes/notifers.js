@@ -66,7 +66,7 @@ export const notifiers = (fastify, _, done) => {
         }
         const vault = vaultFromVaultState(vaultPath, vaultData);
         if (vault.state === "liquidated" || vault.state === "closed") {
-          return reply.status(400).send({ message: "Vault is inactive." });
+          return reply.status(400).send({ message: "Vault is inactive" });
         }
         await insertOrReplaceVault(vault);
 

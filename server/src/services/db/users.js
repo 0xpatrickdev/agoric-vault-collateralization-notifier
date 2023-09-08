@@ -77,16 +77,3 @@ export async function getNotifersByUser(userId) {
     });
   });
 }
-
-/**
- * @description for testing purposes only
- * @returns {Promise<Array<import('../types').User>|Error>} array of users or error
- */
-export async function getAllUsers() {
-  return new Promise((resolve, reject) => {
-    db.all("SELECT * FROM users", (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows);
-    });
-  });
-}

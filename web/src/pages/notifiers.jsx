@@ -56,7 +56,7 @@ const Notifiers = () => {
   const deleteNotifier = async ({ id }) => {
     try {
       const res = await remove(id);
-      if (res.success) fetchNotifiers(true);
+      if (res.ok) fetchNotifiers(true);
     } catch (e) {
       console.error(e);
     }

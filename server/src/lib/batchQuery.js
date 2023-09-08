@@ -1,3 +1,4 @@
+/* c8 ignore start */
 /** @type {import('../types').AgoricChainStoragePathKind} */
 export const AgoricChainStoragePathKind = {
   Children: "children",
@@ -61,10 +62,11 @@ export const batchVstorageQuery = (node, unmarshal, paths) => {
             ];
           }
 
-          const data = JSON.parse(Buffer.from(
-            entry.result.response.value,
-            "base64"
-          ).toString("binary"));
+          const data = JSON.parse(
+            Buffer.from(entry.result.response.value, "base64").toString(
+              "binary"
+            )
+          );
 
           if (paths[index][0] === AgoricChainStoragePathKind.Children) {
             return [
@@ -107,3 +109,4 @@ export const batchVstorageQuery = (node, unmarshal, paths) => {
     )
     .catch((e) => console.log("query error", e));
 };
+/* c8 ignore stop */

@@ -6,13 +6,19 @@ import { getEnvVar } from "../../utils/getEnvVar.js";
 /** @type {import('sqlite3'.Database|undefined)} */
 let db;
 
-/** @returns {Promise<import('sqlite3').Database>} - A promise that resolves when the database has been initialized. */
+/** @returns {import('sqlite3').Database} */
 export const initDb = () => {
-  const DB_PATH = path.join(process.cwd(), getEnvVar("DB_PATH"));
+  const DB_FILENAME = getEnvVar("DB_PATH");
 
-  // create directory if it doesn't exist
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  let DB_PATH;
+  if (DB_FILENAME === ":memory:") {
+    DB_PATH = DB_FILENAME;
+  } else {
+    DB_PATH = path.join(process.cwd(), DB_FILENAME);
+    // create directory if fs based and it doesn't exist
+    const dir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  }
 
   sqlite.verbose();
   db = new sqlite.Database(DB_PATH);
@@ -84,6 +90,22 @@ export const setupDb = async () => {
         FOREIGN KEY(vaultManagerId) REFERENCES Quotes(vaultManagerId)
       );
     `);
+    db.run(`
+    CREATE TABLE IF NOT EXISTS Notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER,
+      vaultManagerId INTEGER,
+      vaultId INTEGER,
+      collateralizationRatio INTEGER,
+      collateralizationRatioActual INTEGER,
+      notifierId INTEGER,
+      sentAt INTEGER,
+      message TEXT,
+      FOREIGN KEY(userId) REFERENCES Users(id),
+      FOREIGN KEY(vaultManagerId, vaultId) REFERENCES Vaults(vaultManagerId, vaultId),
+      FOREIGN KEY(notifierId) REFERENCES Notifiers(id)
+    );
+  `);
   });
   return db;
 };

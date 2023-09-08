@@ -11,7 +11,10 @@ import {
 } from "../src/services/db/index.js";
 
 test.beforeEach(async (t) => {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env.test"),
+    override: true,
+  });
   resetDb();
   t.context.app = makeApp({ logger: false });
   t.context.db = await setupDb(initDb());
@@ -21,6 +24,7 @@ test.beforeEach(async (t) => {
 test.afterEach.always(async (t) => {
   if (t.context.db) {
     await teardownDb();
+    t.context.app = null;
     t.context.db = null;
     t.context.vstorage = null;
   }
