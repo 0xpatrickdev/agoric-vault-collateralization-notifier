@@ -5,6 +5,7 @@ import { getEnvVars } from "../utils/getEnvVar.js";
 
 /**
  * @param {import('fastify').FastifyInstance} fastify
+ * @returns {Promise<void>}
  */
 export const jwtPlugin = fp(async function (fastify) {
   const [JWT_SECRET, JWT_COOKIE_NAME] = getEnvVars([

@@ -9,12 +9,15 @@
   ],
   "scripts": {
     "server:test": "yarn workspace server test",
-    "server:test:watch": "yarn workspace server test:watch",    
+    "server:test:watch": "yarn workspace server test:watch",
     "server:start": "yarn workspace server start",
     "server:lint": "yarn workspace server lint",
     "web:dev": "yarn workspace web dev",
-    "web:start": "yarn workspace web start",
-    "web:lint": "yarn workspace web lint"
+    "web:build": "yarn workspace web build",
+    "web:test": "yarn workspace web test",
+    "web:lint": "yarn workspace web lint",
+    "web:preview": "yarn workspace web preview",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "eslint": "^8.47.0"

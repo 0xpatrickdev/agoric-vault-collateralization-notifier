@@ -15,7 +15,12 @@ module.exports = {
   rules: {
     "no-unused-vars": [
       "error",
-      { vars: "all", args: "all", argsIgnorePattern: "^_" },
+      {
+        vars: "all",
+        args: "all",
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+      },
     ],
     "react-refresh/only-export-components": [
       "warn",

@@ -3,7 +3,7 @@ import path from "path";
 import sqlite from "sqlite3";
 import { getEnvVar } from "../../utils/getEnvVar.js";
 
-/** @type {import('sqlite3'.Database|undefined)} */
+/** @type {import('sqlite3').Database|undefined} */
 let db;
 
 /** @returns {import('sqlite3').Database} */

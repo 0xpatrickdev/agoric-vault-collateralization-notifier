@@ -19,7 +19,11 @@ export const managerIdFromPath = (path) =>
 export const vaultIdFromPath = (path) =>
   Number(path.split("vaults.")[1].split(".")[0].slice(5));
 
-/** @returns {import('@shared/types').Vault} */
+/**
+ * @param {string} path vstorage path
+ * @param {object} vaultData deserialized capdata from vstorage path
+ * @returns {import('@shared/types').Vault}
+ */
 export const vaultFromVaultState = (path, vaultData) => {
   const { locked: _locked, debtSnapshot, vaultState } = vaultData;
   return {
@@ -31,7 +35,11 @@ export const vaultFromVaultState = (path, vaultData) => {
   };
 };
 
-/** @returns {import('@shared/types').Quote} */
+/** 
+ * @param {string} path vstorage path
+ * @param {object} quoteData deserialized capdata from vstorage path
+ * @returns {import('@shared/types').Quote}
+ */
 export const quoteFromQuoteState = (path, quoteData) => {
   const { amountIn, amountOut } = quoteData.quoteAmount.value[0];
   return {
