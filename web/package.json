@@ -8,8 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "postinstall": "patch-package"
+    "preview": "vite build && vite preview"
   },
   "dependencies": {
     "@agoric/eventual-send": "^0.14.1",
