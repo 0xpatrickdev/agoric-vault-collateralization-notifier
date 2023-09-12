@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  install:
+  server:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -17,20 +17,22 @@ jobs:
           node-version: '18.x'
       - name: yarn install
         run: yarn install
-
-  server:
-    needs: install
-    runs-on: ubuntu-latest
-    steps:
       - name: yarn server:lint
         run: yarn server:lint
       - name: yarn server:test
         run: yarn server:test
 
   client:
-    needs: install
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: yarn install
+        run: yarn install
       - name: yarn web:lint
         run: yarn web:lint
       - name: yarn web:build
