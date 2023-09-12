@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { BellAlertIcon, EnvelopeIcon } from "@heroicons/react/20/solid";
 import Empty from "../components/empty";
 import { ConnectedEmailModal } from "../components/connectedEmailModal";
@@ -19,10 +19,15 @@ const Notifiers = () => {
   const { getNotifiers, remove, isLoading } = useNotifiers();
   const [searchParams] = useSearchParams();
   const { brands, quotes, vaults, managerGovParams } = useChain();
+  const navigate = useNavigate();
 
   const handleNotifierCreated = () => {
     fetchNotifiers(true);
     setShowCreateNotifier(false);
+    if (searchParams.has("managerId")) {
+      // clear search params
+      navigate("/notifiers");
+    }
   };
 
   const fetchNotifiers = async (refetch = false) => {
