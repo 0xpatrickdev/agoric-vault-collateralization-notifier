@@ -63,6 +63,7 @@ const NotifierList = ({
         vault.managerId === String(notifier.vaultManagerId)
     );
     if (!vault) return null;
+    if (Object.keys(quotes).length === 0) return null;
 
     const govParams = managerGovParams[`manager${vault.managerId}`];
 

@@ -10,7 +10,7 @@ import {
  * @param {any[]} brandList
  * @returns {number}
  */
-const getDecimalPlaces = (brand, brandList) =>
+export const getDecimalPlaces = (brand, brandList) =>
   brandList.find((b) => String(b.brand) === String(brand))?.displayInfo
     ?.decimalPlaces;
 /**

@@ -16,8 +16,26 @@ import {
   setNotifierExpired,
   insertOrReplaceQuote,
   getLatestQuote,
+  insertOrReplaceBrand,
 } from "../../src/services/db/index.js";
 import { FIVE_SECONDS_IN_MS } from "../../src/utils/constants.js";
+
+const fixtures = {
+  brands: [
+    {
+      brand: "[object Alleged: SEVERED: ATOM brand]",
+      issuerName: "ATOM",
+      decimalPlaces: 6,
+      assetKind: "nat",
+    },
+    {
+      brand: "[object Alleged: SEVERED: IST brand]",
+      issuerName: "IST",
+      decimalPlaces: 6,
+      assetKind: "nat",
+    },
+  ],
+};
 
 test.beforeEach(async (t) => {
   dotenv.config({
@@ -124,11 +142,18 @@ test("getLatestQuote returns the lastest quote", async (t) => {
     outIssuerName: "ATOM",
   };
 
+  const quotesWithDisplayInfo = Object.assign({}, quote, {
+    amountInDecimals: 6,
+    amountOutDecimals: 6,
+  });
+
   await insertOrReplaceQuote(quote);
+  await Promise.all(fixtures.brands.map(insertOrReplaceBrand)); // ensure brands exist
+
   const { latestTimestamp, ...rest } = await getLatestQuote(
     quote.vaultManagerId
   );
-  t.deepEqual(quote, rest, "Quote should be retrievable.");
+  t.deepEqual(quotesWithDisplayInfo, rest, "Quote should be retrievable.");
   t.truthy(latestTimestamp, "Quote should have a timestamp.");
 });
 
