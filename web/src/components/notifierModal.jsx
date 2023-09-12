@@ -20,21 +20,26 @@ const NotifierModal = ({
 }) => {
   const [manager, setManager] = useState(initialManagerOption);
   const [vault, setVault] = useState(initialVaultOption);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [percentTouched, setPercentTouched] = useState(false);
   const cancelButtonRef = useRef(null);
   const percentRef = useRef(null);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const collateralizationRatio = Number(percentRef.current.value);
     if (!collateralizationRatio || collateralizationRatio.length == 0) {
       // @todo show error ?
     }
-    handleSubmit({
+    await handleSubmit({
       collateralizationRatio,
       vaultManagerId: Number(manager.managerId),
       vaultId: Number(vault.vaultId),
     });
+    setIsSubmitting(false);
   };
 
   const handleManagerChange = (vault) => {
@@ -141,7 +146,9 @@ const NotifierModal = ({
                   </div>
                   <button
                     type="submit"
-                    disabled={!manager || !vault || !percentTouched}
+                    disabled={
+                      !manager || !vault || !percentTouched || isSubmitting
+                    }
                     className="mt-4 inline-flex w-48 items-center justify-center rounded-md bg-interPurple px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interPurple"
                   >
                     {buttonLabel}

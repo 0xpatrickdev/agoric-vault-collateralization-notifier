@@ -97,7 +97,11 @@ test("notifier user input sanitization", async (t) => {
     [{ vaultId: -5 }, "Vault ID must be a positive integer"],
     [
       { collateralizationRatio: null },
-      "collateralizationRatio must be a number",
+      "Collateralization Ratio must be a positive integer",
+    ],
+    [
+      { collateralizationRatio: -5 },
+      "Collateralization Ratio must be a positive integer",
     ],
     [{ vaultManager: 0, vaultId: 9999999999 }, "Vault does not exist"],
     [{ vaultManager: 0, vaultId: 3 }, "Vault is inactive"],
