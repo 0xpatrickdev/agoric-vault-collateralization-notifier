@@ -45,7 +45,6 @@ export async function maybeSendNotification(
 
   for (const notifier of notifiers) {
     const { email, brand, collateralizationRatio } = notifier;
-    // build email template
     const { subject, text } = getNotificationTemplate({
       brand,
       vaultId,
@@ -61,9 +60,7 @@ export async function maybeSendNotification(
     };
 
     try {
-      // store notification record in db
       await createNotification(notification);
-      // send notification email
       await sendEmail({ email, subject, text });
       // mark Notifier as "sent" so we don't send it again
       await updateNotifierStatus(notifier.id, 1);
@@ -109,15 +106,21 @@ export async function handleVault(path, vaultData) {
   }
 
   try {
-    const { quoteAmountIn, quoteAmountOut } = await getLatestQuote(
-      Number(vaultManagerId)
-    );
+    const {
+      quoteAmountIn,
+      quoteAmountOut,
+      amountInDecimals,
+      amountOutDecimals,
+    } = await getLatestQuote(Number(vaultManagerId));
     if (!quoteAmountIn || !quoteAmountOut) throw new Error("Quote not found.");
+    if (debt === 0) return;
     const ratio = calculateCollateralizationRatio({
       locked,
       debt,
       quoteAmountIn,
       quoteAmountOut,
+      amountInDecimals,
+      amountOutDecimals,
     });
     await maybeSendNotification(Number(ratio), vaultManagerId, vaultId);
   } catch (error) {
@@ -134,16 +137,23 @@ export async function handleQuote(path, value) {
   );
 
   try {
-    await updateQuote({ vaultManagerId, quoteAmountIn, quoteAmountOut });
+    const { amountInDecimals, amountOutDecimals } = await updateQuote({
+      vaultManagerId,
+      quoteAmountIn,
+      quoteAmountOut,
+    });
     const vaults = await getAllVaultsByManagerId(vaultManagerId);
     if (vaults) console.log(`found ${vaults.length} vaults`);
 
     for (const { locked, debt, vaultId } of vaults) {
+      if (debt === 0) continue;
       const ratio = calculateCollateralizationRatio({
         locked,
         debt,
         quoteAmountIn,
         quoteAmountOut,
+        amountInDecimals,
+        amountOutDecimals,
       });
       await maybeSendNotification(ratio, vaultManagerId, vaultId);
     }
@@ -177,9 +187,7 @@ export async function handleVbankAssets(_path, value) {
  * @returns {Promise<void>}
  */
 export async function stopWatchingVault(vaultManagerId, vaultId) {
-  // stop watching vault path
   vstorageWatcher.removePath(makeVaultPath(vaultManagerId, vaultId));
-  // mark relevant notifiers as expired
   const notifiers = await getNotifiersByVaultId({ vaultId, vaultManagerId });
   for (const { id } of notifiers) {
     await setNotifierExpired(id);

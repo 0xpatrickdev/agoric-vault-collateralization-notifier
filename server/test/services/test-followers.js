@@ -14,10 +14,12 @@ import {
   createNotifier,
   getNotifiersByVaultId,
   getNotificationsByUserId,
+  insertOrReplaceBrand,
 } from "../../src/services/db/index.js";
 import {
   maybeSendNotification,
   handleVault,
+  handleQuote,
 } from "../../src/services/followers.js";
 import { initVstorageWatcher } from "../../src/vstorageWatcher.js";
 
@@ -101,6 +103,68 @@ const fixtures = {
       outIssuerName: "ATOM",
     },
   ],
+  brands: [
+    {
+      brand: "[object Alleged: SEVERED: ATOM brand]",
+      issuerName: "ATOM",
+      decimalPlaces: 6,
+      assetKind: "nat",
+    },
+    {
+      brand: "[object Alleged: SEVERED: IST brand]",
+      issuerName: "IST",
+      decimalPlaces: 6,
+      assetKind: "nat",
+    },
+  ],
+  vaultData: [
+    {
+      debtSnapshot: {
+        debt: {
+          brand: "[object Alleged: SEVERED: IST brand]",
+          value: 11872792789n,
+        },
+      },
+      locked: {
+        brand: "[object Alleged: SEVERED: ATOM brand]",
+        value: 4420000000n,
+      },
+      vaultState: "active",
+    },
+    {
+      debtSnapshot: {
+        debt: {
+          brand: "[object Alleged: SEVERED: IST brand]",
+          value: 150838150n,
+        },
+      },
+      locked: {
+        brand: "[object Alleged: SEVERED: ATOM brand]",
+        value: 52500000n,
+      },
+      vaultState: "active",
+    },
+  ],
+  quoteData: [
+    {
+      quoteAmount: {
+        brand: "[object Alleged: quote brand]",
+        value: [
+          {
+            amountIn: {
+              value: 1000000n,
+              brand: "[object Alleged: SEVERED: IST brand]",
+            },
+            amountOut: {
+              value: 6917094n,
+              brand: "[object Alleged: SEVERED: ATOM brand]",
+            },
+          },
+        ],
+      },
+      quotePayment: "[object Alleged: quote payment]",
+    },
+  ],
 };
 
 test("maybeSendNotification should send a notification for vaults that breach the threshold", async (t) => {
@@ -110,6 +174,7 @@ test("maybeSendNotification should send a notification for vaults that breach th
     { userId: 1, vaultManagerId: 0, vaultId: 24, collateralizationRatio: 999 },
   ];
 
+  await Promise.all(fixtures.brands.map(insertOrReplaceBrand));
   await Promise.all(fixtures.vaults.map(insertOrReplaceVault));
   await Promise.all(fixtures.quotes.map(insertOrReplaceQuote));
   await Promise.all(notifiers.map(createNotifier));
@@ -119,6 +184,7 @@ test("maybeSendNotification should send a notification for vaults that breach th
 
   // ensure email api is called
   notifiers.forEach((n, i) => {
+    // start at index 1, because 0 is for verify email
     const call = t.context.postStub.getCall(i + 1).args[1];
     t.is(
       call.subject,
@@ -150,13 +216,14 @@ test("maybeSendNotification should send a notification for vaults that breach th
   });
 });
 
-test("maybeSendNotification should not a notification for vaults that haeven't breached the threshold", async (t) => {
+test("maybeSendNotification should not a notification for vaults that haven't breached the threshold", async (t) => {
   const notifiers = [
     { userId: 1, vaultManagerId: 0, vaultId: 20, collateralizationRatio: 500 },
     { userId: 1, vaultManagerId: 0, vaultId: 20, collateralizationRatio: 550 },
     { userId: 1, vaultManagerId: 0, vaultId: 24, collateralizationRatio: 500 },
   ];
 
+  await Promise.all(fixtures.brands.map(insertOrReplaceBrand));
   await Promise.all(fixtures.vaults.map(insertOrReplaceVault));
   await Promise.all(fixtures.quotes.map(insertOrReplaceQuote));
   await Promise.all(notifiers.map(createNotifier));
@@ -182,6 +249,7 @@ test("maybeSendNotification should only send one notification until the threshol
     { userId: 1, vaultManagerId: 0, vaultId: 20, collateralizationRatio: 500 },
   ];
 
+  await Promise.all(fixtures.brands.map(insertOrReplaceBrand));
   await Promise.all(fixtures.vaults.map(insertOrReplaceVault));
   await Promise.all(fixtures.quotes.map(insertOrReplaceQuote));
   const dbNotifiers0 = await Promise.all(notifiers.map(createNotifier));
@@ -191,7 +259,7 @@ test("maybeSendNotification should only send one notification until the threshol
     "Notifier should be `active: false` to start."
   );
 
-  // sent to price (collateralizationRatio) updates
+  // send price (collateralizationRatio) updates
   await maybeSendNotification(100, 0, 20);
   await maybeSendNotification(101, 0, 20);
 
@@ -243,6 +311,7 @@ test("maybeSendNotification returns with no action when an invalid collateraliza
     { userId: 1, vaultManagerId: 0, vaultId: 20, collateralizationRatio: 550 },
   ];
 
+  await Promise.all(fixtures.brands.map(insertOrReplaceBrand));
   await Promise.all(fixtures.vaults.map(insertOrReplaceVault));
   await Promise.all(fixtures.quotes.map(insertOrReplaceQuote));
   await Promise.all(notifiers.map(createNotifier));
@@ -264,25 +333,11 @@ test("maybeSendNotification returns with no action when an invalid collateraliza
 
 test("handleVault should mark a closed or liquidated vault expired", async (t) => {
   const vaultPath = "published.vaultFactory.managers.manager0.vaults.vault20";
-  const vaultData = {
-    debtSnapshot: {
-      debt: {
-        brand: "Alleged: SEVERED: IST brand ",
-        value: 11872792789n,
-      },
-    },
-    locked: {
-      brand: "Alleged: SEVERED: ATOM brand",
-      value: 4420000000n,
-    },
+  const vaultData = Object.assign({}, fixtures.vaultData[0], {
     vaultState: "closed",
-  };
+  });
 
-  const modifiedFixtures = { ...fixtures };
-  modifiedFixtures.vaults[0].vaultId = 3;
-  modifiedFixtures.vaults[1].vaultId = 3;
-  await Promise.all(modifiedFixtures.vaults.map(insertOrReplaceVault));
-  await Promise.all(modifiedFixtures.quotes.map(insertOrReplaceQuote));
+  await Promise.all(fixtures.quotes.map(insertOrReplaceQuote));
 
   await handleVault(vaultPath, vaultData);
 
@@ -291,4 +346,75 @@ test("handleVault should mark a closed or liquidated vault expired", async (t) =
     `Skipping vault with state: ${vaultData.vaultState}`,
     "console.error should be called"
   );
+});
+
+test("handleVault should skip vaults with no debt", async (t) => {
+  const vaultPath = "published.vaultFactory.managers.manager0.vaults.vault20";
+  const notifiers = [
+    { userId: 1, vaultManagerId: 0, vaultId: 20, collateralizationRatio: 1000 },
+  ];
+  const vaultData = Object.assign({}, fixtures.vaultData[0]);
+  vaultData.debtSnapshot.debt.value = 0n;
+
+  await Promise.all(fixtures.quotes.map(insertOrReplaceQuote));
+  await Promise.all(notifiers.map(createNotifier));
+
+  await handleVault(vaultPath, vaultData);
+
+  notifiers.forEach((_, i) => {
+    const call = t.context.postStub.getCall(i + 1);
+    t.falsy(call, `Email should not be sent when vault has 0 debt`);
+  });
+
+  const dbNotifications = await getNotificationsByUserId(notifiers[0].userId);
+  t.is(
+    dbNotifications.length,
+    0,
+    "No notifications should be persisted to the db when vault has 0 debt"
+  );
+});
+
+test("handleQuote should send email notification when threshold is breached", async (t) => {
+  const quotePath = "published.vaultFactory.managers.manager0.quotes";
+  const notifiers = [
+    { userId: 1, vaultManagerId: 0, vaultId: 20, collateralizationRatio: 1000 },
+    { userId: 1, vaultManagerId: 0, vaultId: 20, collateralizationRatio: 800 },
+  ];
+
+  await Promise.all(fixtures.brands.map(insertOrReplaceBrand));
+  await Promise.all(fixtures.quotes.map(insertOrReplaceQuote));
+  await Promise.all(fixtures.vaults.map(insertOrReplaceVault));
+  await Promise.all(notifiers.map(createNotifier));
+
+  await handleQuote(quotePath, fixtures.quoteData[0]);
+
+  notifiers.forEach((n, i) => {
+    const call = t.context.postStub.getCall(i + 1).args[1];
+    t.is(
+      call.subject,
+      "Inter Vault Alert: Collateralization Level Breached",
+      `Email is sent for scenario ${i + 1}`
+    );
+    t.is(
+      call.text,
+      `Your ATOM vault #${n.vaultId}, has crossed below the ${n.collateralizationRatio}% collateralization level.`,
+      `Email body is correct for scenario ${i + 1}`
+    );
+  });
+
+  const dbNotifications = await getNotificationsByUserId(notifiers[0].userId);
+  dbNotifications.reverse().forEach(({ id, message, sentAt }, i) => {
+    t.truthy(
+      id,
+      `Notification is persisted to the database for scenario ${i + 1}`
+    );
+    t.truthy(
+      message,
+      `Notification message is persisted to the database for scenario ${i + 1}`
+    );
+    t.truthy(
+      String(sentAt).length === 13 && typeof sentAt === "number",
+      `Notification stores a sentAt timestamp for scenario ${i + 1}`
+    );
+  });
 });

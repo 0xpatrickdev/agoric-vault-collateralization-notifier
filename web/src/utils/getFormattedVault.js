@@ -1,4 +1,4 @@
-import { displayAmount, displayPrice } from "./formatters";
+import { displayAmount, displayPrice, getDecimalPlaces } from "./formatters";
 import { calculateCollateralizationRatio } from "./vaultMath";
 
 export const getFormattedVault = (vault, brands, quotes) => {
@@ -19,11 +19,18 @@ export const getFormattedVault = (vault, brands, quotes) => {
     : null;
   const oraclePrice = quote?.displayPrice;
 
+  const amountInDecimals = getDecimalPlaces(
+    vault?.debtSnapshot?.debt?.brand,
+    brands
+  );
+  const amountOutDecimals = getDecimalPlaces(vault?.locked?.brand, brands);
   const collateralizationRatio = calculateCollateralizationRatio({
     locked: vault?.locked?.value,
     debt: vault?.debtSnapshot?.debt?.value,
     quoteAmountIn: quote?.quoteAmount?.value?.[0]?.amountIn?.value,
     quoteAmountOut: quote?.quoteAmount?.value?.[0]?.amountOut?.value,
+    amountOutDecimals,
+    amountInDecimals,
     asString: true,
     bps: false,
   });

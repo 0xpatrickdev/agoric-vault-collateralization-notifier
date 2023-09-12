@@ -50,12 +50,18 @@ export async function insertOrReplaceQuote(quoteData) {
 /**
  * Retrieve the latest quote for a given manager.
  * @param {number} managerId - The manager ID.
- * @returns {Promise<{ amountIn: number, amountOut: number }>} The latest quote.
+ * @returns {Promise<{ amountIn: number, amountOut: number, amountInDecimals: number, amountOutDecimals: number }>} The latest quote.
  */
 export function getLatestQuote(managerId) {
   return new Promise((resolve, reject) => {
     db.get(
-      "SELECT * FROM Quotes WHERE vaultManagerId = ?",
+      `SELECT Quotes.*,
+            BrandsIn.decimalPlaces AS amountInDecimals,
+            BrandsOut.decimalPlaces AS amountOutDecimals
+       FROM Quotes
+       LEFT JOIN Brands AS BrandsIn ON Quotes.inIssuerName = BrandsIn.issuerName
+       LEFT JOIN Brands AS BrandsOut ON Quotes.outIssuerName = BrandsOut.issuerName
+       WHERE Quotes.vaultManagerId = ?`,
       [managerId],
       (err, row) => {
         if (err) return reject(err);
@@ -93,7 +99,7 @@ export function checkQuoteExists(managerId) {
  * @param {number} opts.vaultManagerId - The vault manager ID (e.g., 0)
  * @param {number} opts.quoteAmountIn
  * @param {number} opts.quoteAmountOut
- * @returns {Promise<void>}
+ * @returns {Promise<{ amountIn: number, amountOut: number, amountInDecimals: number, amountOutDecimals: number }>}
  */
 export async function updateQuote({
   vaultManagerId,
@@ -108,7 +114,27 @@ export async function updateQuote({
         WHERE vaultManagerId = ?
       `,
       [quoteAmountIn, quoteAmountOut, new Date().getTime(), vaultManagerId],
-      (err) => (err ? reject(err) : resolve())
+      (err) => {
+        if (err) return reject(err);
+        db.get(
+          `SELECT Quotes.*,
+                BrandsIn.decimalPlaces AS amountInDecimals,
+                BrandsOut.decimalPlaces AS amountOutDecimals
+           FROM Quotes
+           LEFT JOIN Brands AS BrandsIn ON Quotes.inIssuerName = BrandsIn.issuerName
+           LEFT JOIN Brands AS BrandsOut ON Quotes.outIssuerName = BrandsOut.issuerName
+           WHERE Quotes.vaultManagerId = ?`,
+          [vaultManagerId],
+          (err, row) => {
+            if (err) return reject(err);
+            if (!row)
+              return reject(
+                new Error(`No quotes found for managerId ${vaultManagerId}`)
+              );
+            resolve(row);
+          }
+        );
+      }
     );
   });
 }
