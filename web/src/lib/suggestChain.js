@@ -92,9 +92,9 @@ const makeChainInfo = (
 };
 
 /**
- *
  * @param {string} networkConfigHref
- * @param {string=} caption
+ * @param {string} caption
+ * @returns {ChainInfo}
  */
 export async function suggestChain(networkConfigHref, caption) {
   // @ts-expect-error Check for Keplr

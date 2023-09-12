@@ -6,7 +6,15 @@ module.exports = {
   parserOptions: { ecmaVersion: 12, sourceType: "module" },
   plugins: [],
   rules: {
-    "no-unused-vars": ["error", { args: "all", argsIgnorePattern: "^_" }],
+    "no-unused-vars": [
+      "error",
+      {
+        args: "all",
+        vars: "all",
+        varsIgnorePattern: "^_",
+        argsIgnorePattern: "^_",
+      },
+    ],
     "node/no-unsupported-features/es-syntax": "off",
     "node/no-unpublished-import": "off",
     "node/no-missing-import": [
