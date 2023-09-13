@@ -1,9 +1,5 @@
 import { createContext, useCallback, useEffect, useState } from "react";
-import {
-  createNotifier,
-  getNotifiers as getNotifiersReq,
-  deleteNotifier,
-} from "../lib/api";
+import { createNotifier, getNotifiers, deleteNotifier } from "../lib/api";
 import { useAuth } from "../hooks/auth";
 import { useChain } from "../hooks/chain";
 
@@ -47,13 +43,13 @@ export const NotifierContextProvider = ({ children }) => {
    * @param {boolean} refetch ignore cached data and force refetch
    * @returns {Promise<import('@shared/types').Notifiers[]>}
    */
-  const getNotifiers = useCallback(
+  const fetchNotifiers = useCallback(
     async (refetch = false) => {
       if (!isLoggedIn) return [];
       if (Array.isArray(notifiers) && !refetch) return notifiers;
       try {
         setIsLoading(true);
-        const notifiers = await getNotifiersReq();
+        const notifiers = await getNotifiers();
         setNotifiers(notifiers);
         return notifiers;
       } catch (e) {
@@ -85,9 +81,10 @@ export const NotifierContextProvider = ({ children }) => {
   return (
     <NotifierContext.Provider
       value={{
-        getNotifiers,
+        fetchNotifiers,
         create,
         remove,
+        notifiers,
         isLoading,
       }}
     >

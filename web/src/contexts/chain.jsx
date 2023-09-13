@@ -47,11 +47,9 @@ export const ChainContextProvider = ({ children }) => {
   }, [chainName]);
 
   const watchPath = (kind, path, handler) => {
-    // console.log("path", path);
     if (!paths.has(path)) {
       paths.add(path);
       stoppers.push(watcher.watchLatest([kind, path], handler));
-      // console.log("new watcher", path);
     }
   };
 
@@ -144,7 +142,7 @@ export const ChainContextProvider = ({ children }) => {
                   liquidationRatio: ratioToDisplayPercent(
                     data.current.LiquidationMargin.value
                   ),
-                  collateralRatio: ratioToDisplayPercent(
+                  minimumCollateralRatio: ratioToDisplayPercent(
                     addRatios(
                       data.current.LiquidationMargin.value,
                       data.current.LiquidationPadding.value
@@ -167,31 +165,33 @@ export const ChainContextProvider = ({ children }) => {
       watcher.watchLatest(
         [Kind.Data, makeVaultPath(managerId, vaultId)],
         (data) => {
-          const currentIdx = vaults.findIndex(
-            (x) => x.vaultId === vaultId && x.managerId === managerId
-          );
-          if (currentIdx >= 0) {
-            const {
-              vaultId,
-              managerId,
-              owned: _owned,
-              ...rest
-            } = vaults[currentIdx];
-            if (isEqual(data, rest)) return;
-            const updated = [...vaults];
-            updated[currentIdx] = {
-              ...data,
-              vaultId,
-              managerId,
-              owned: !!owned,
-            };
-            setVaults(updated);
-          } else {
-            setVaults((prev) => [
-              ...prev,
-              { ...data, vaultId, managerId, owned: !!owned },
-            ]);
-          }
+          setVaults((currVaults) => {
+            const currentIdx = currVaults.findIndex(
+              (x) => x.vaultId === vaultId && x.managerId === managerId
+            );
+            if (currentIdx >= 0) {
+              const {
+                vaultId,
+                managerId,
+                owned: _owned,
+                ...rest
+              } = currVaults[currentIdx];
+              if (isEqual(data, rest)) return currVaults;
+              const updatedVaults = [...currVaults];
+              updatedVaults[currentIdx] = {
+                ...data,
+                vaultId,
+                managerId,
+                owned: !!owned,
+              };
+              return updatedVaults;
+            } else {
+              return [
+                ...currVaults,
+                { ...data, vaultId, managerId, owned: !!owned },
+              ];
+            }
+          });
         }
       );
     }

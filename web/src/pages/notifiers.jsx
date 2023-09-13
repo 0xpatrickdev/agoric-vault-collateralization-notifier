@@ -12,31 +12,31 @@ import { useChain } from "../hooks/chain";
 
 const Notifiers = () => {
   const [showLogin, setShowLogin] = useState(false);
-  const [notifiers, setNotifiers] = useState(undefined);
   const [showCreateNotifier, setShowCreateNotifier] = useState(false);
   const [initialNotifierValues, setInitialNotifierValues] = useState(null);
   const { isLoggedIn } = useAuth();
-  const { getNotifiers, remove, isLoading } = useNotifiers();
+  const { notifiers, remove, fetchNotifiers, isLoading } = useNotifiers();
+
   const [searchParams] = useSearchParams();
   const { brands, quotes, vaults, managerGovParams } = useChain();
   const navigate = useNavigate();
 
-  const handleNotifierCreated = () => {
-    fetchNotifiers(true);
-    setShowCreateNotifier(false);
+  const clearSearchParams = () => {
     if (searchParams.has("managerId")) {
-      // clear search params
       navigate("/notifiers");
     }
   };
 
-  const fetchNotifiers = async (refetch = false) => {
-    try {
-      const data = await getNotifiers(refetch);
-      setNotifiers(data);
-    } catch (error) {
-      console.error(error);
-    }
+  const handleOnModalClose = () => {
+    clearSearchParams();
+    setInitialNotifierValues(null);
+  };
+
+  const handleNotifierCreated = () => {
+    fetchNotifiers(true);
+    setShowCreateNotifier(false);
+    clearSearchParams();
+    setInitialNotifierValues(null);
   };
 
   useEffect(() => {
@@ -105,6 +105,7 @@ const Notifiers = () => {
             setIsVisible={setShowCreateNotifier}
             onSuccess={handleNotifierCreated}
             initialValues={initialNotifierValues}
+            onClose={handleOnModalClose}
           />
         </>
       ) : (
