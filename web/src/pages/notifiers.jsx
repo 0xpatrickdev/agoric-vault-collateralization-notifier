@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { BellAlertIcon, EnvelopeIcon } from "@heroicons/react/20/solid";
 import Empty from "../components/empty";
 import { ConnectedEmailModal } from "../components/connectedEmailModal";
@@ -12,26 +12,31 @@ import { useChain } from "../hooks/chain";
 
 const Notifiers = () => {
   const [showLogin, setShowLogin] = useState(false);
-  const [notifiers, setNotifiers] = useState(undefined);
   const [showCreateNotifier, setShowCreateNotifier] = useState(false);
   const [initialNotifierValues, setInitialNotifierValues] = useState(null);
   const { isLoggedIn } = useAuth();
-  const { getNotifiers, remove, isLoading } = useNotifiers();
+  const { notifiers, remove, fetchNotifiers, isLoading } = useNotifiers();
+
   const [searchParams] = useSearchParams();
   const { brands, quotes, vaults, managerGovParams } = useChain();
+  const navigate = useNavigate();
+
+  const clearSearchParams = () => {
+    if (searchParams.has("managerId")) {
+      navigate("/notifiers");
+    }
+  };
+
+  const handleOnModalClose = () => {
+    clearSearchParams();
+    setInitialNotifierValues(null);
+  };
 
   const handleNotifierCreated = () => {
     fetchNotifiers(true);
     setShowCreateNotifier(false);
-  };
-
-  const fetchNotifiers = async (refetch = false) => {
-    try {
-      const data = await getNotifiers(refetch);
-      setNotifiers(data);
-    } catch (error) {
-      console.error(error);
-    }
+    clearSearchParams();
+    setInitialNotifierValues(null);
   };
 
   useEffect(() => {
@@ -100,6 +105,7 @@ const Notifiers = () => {
             setIsVisible={setShowCreateNotifier}
             onSuccess={handleNotifierCreated}
             initialValues={initialNotifierValues}
+            onClose={handleOnModalClose}
           />
         </>
       ) : (

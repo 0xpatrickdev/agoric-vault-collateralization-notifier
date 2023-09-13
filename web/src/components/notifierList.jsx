@@ -1,5 +1,4 @@
 import { getFormattedVault } from "../utils/getFormattedVault";
-import { capitalize } from "../utils/capitalize";
 import { PlusCircleIcon } from "@heroicons/react/20/solid";
 
 const NotifierList = ({
@@ -73,6 +72,7 @@ const NotifierList = ({
       collateralValueDisplay,
       debtAmountDisplay,
       collateralizationRatio,
+      vaultStatus,
     } = getFormattedVault(vault, brands, quotes);
 
     return (
@@ -81,13 +81,13 @@ const NotifierList = ({
           {vault.vaultId}
         </td>
         {[
-          capitalize(vault?.vaultState),
+          vaultStatus,
           collateralBrand,
           collateralAmountDisplay,
           collateralValueDisplay,
           debtAmountDisplay,
           collateralizationRatio,
-          govParams.collateralRatio,
+          govParams.minimumCollateralRatio,
           govParams.liquidationRatio,
         ].map((value, idx) => (
           <td

@@ -1,4 +1,4 @@
-import { isNumber, isNaturalNumber } from "../utils/validation.js";
+import { isNaturalNumber } from "../utils/validation.js";
 import {
   createNotifier,
   checkQuoteExists,
@@ -45,10 +45,10 @@ export const notifiers = (fastify, _, done) => {
           .status(400)
           .send({ message: "Vault ID must be a positive integer" });
 
-      if (!isNumber(collateralizationRatio))
-        return reply
-          .status(400)
-          .send({ message: "collateralizationRatio must be a number" });
+      if (!isNaturalNumber(collateralizationRatio))
+        return reply.status(400).send({
+          message: "Collateralization Ratio must be a positive integer",
+        });
 
       // ensure vault exists and is active, then add to db
       const vaultExistsInDb = await checkVaultExists(vaultManagerId, vaultId);

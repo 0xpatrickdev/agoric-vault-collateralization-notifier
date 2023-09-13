@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ComboBox } from "../components/comboBox";
 import { PercentInput } from "../components/percentInput";
+import { InfoBanner } from "../components/infoBanner";
 
 const NotifierModal = ({
   title,
@@ -17,24 +18,32 @@ const NotifierModal = ({
   onVaultChange,
   initialManagerOption,
   initialVaultOption,
+  selectedManagerStats,
+  selectedVaultStats,
+  onClose,
 }) => {
   const [manager, setManager] = useState(initialManagerOption);
   const [vault, setVault] = useState(initialVaultOption);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [percentTouched, setPercentTouched] = useState(false);
   const cancelButtonRef = useRef(null);
   const percentRef = useRef(null);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const collateralizationRatio = Number(percentRef.current.value);
     if (!collateralizationRatio || collateralizationRatio.length == 0) {
       // @todo show error ?
     }
-    handleSubmit({
+    await handleSubmit({
       collateralizationRatio,
       vaultManagerId: Number(manager.managerId),
       vaultId: Number(vault.vaultId),
     });
+    setIsSubmitting(false);
   };
 
   const handleManagerChange = (vault) => {
@@ -45,6 +54,13 @@ const NotifierModal = ({
   const handleVaultChange = (manager) => {
     setVault(manager);
     onVaultChange(manager);
+  };
+
+  const handleClose = () => {
+    setIsVisible(false);
+    if (onClose && typeof onClose === "function") {
+      onClose();
+    }
   };
 
   useEffect(() => {
@@ -63,7 +79,7 @@ const NotifierModal = ({
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
-        onClose={() => setIsVisible(false)}
+        onClose={handleClose}
       >
         <Transition.Child
           as={Fragment}
@@ -116,6 +132,10 @@ const NotifierModal = ({
                       onChange={handleManagerChange}
                       initialValue={initialManagerOption}
                     />
+                    <InfoBanner
+                      visible={!!selectedManagerStats}
+                      items={selectedManagerStats}
+                    />
                   </div>
                   <div className="w-full sm:max-w-xs mb-2">
                     <ComboBox
@@ -126,6 +146,10 @@ const NotifierModal = ({
                       displayKey="vaultKey"
                       onChange={handleVaultChange}
                       initialValue={initialVaultOption}
+                    />
+                    <InfoBanner
+                      visible={!!selectedVaultStats}
+                      items={selectedVaultStats}
                     />
                   </div>
                   <div className="w-full sm:max-w-xs mb-2">
@@ -141,7 +165,9 @@ const NotifierModal = ({
                   </div>
                   <button
                     type="submit"
-                    disabled={!manager || !vault || !percentTouched}
+                    disabled={
+                      !manager || !vault || !percentTouched || isSubmitting
+                    }
                     className="mt-4 inline-flex w-48 items-center justify-center rounded-md bg-interPurple px-3 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interPurple"
                   >
                     {buttonLabel}
@@ -165,7 +191,7 @@ NotifierModal.defaultProps = {
   inputLabel: "Email",
   buttonLabel: "Submit",
   description:
-    "An email notification will be sent when the vault reaches the specified collateralization ratio.",
+    "An email notification will be sent when the vault falls below the specified collateralization ratio.",
 };
 
 export { NotifierModal };

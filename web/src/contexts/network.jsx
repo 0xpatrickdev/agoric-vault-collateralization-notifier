@@ -8,7 +8,7 @@ export const NetworkContext = createContext();
 const getNameName = (netName) =>
   ["local" | "devnet" | "ollinet" | "emerynet" | "main"].includes(netName)
     ? netName
-    : "main";
+    : "devnet";
 
 export const NetworkContextProvider = ({ children }) => {
   /** @type {import('@shared/types').NetName} */

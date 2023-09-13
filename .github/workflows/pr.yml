@@ -1,8 +1,6 @@
 name: Lint and Test
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 jobs:
@@ -20,7 +18,12 @@ jobs:
       - name: yarn server:lint
         run: yarn server:lint
       - name: yarn server:test
-        run: yarn server:test
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          retry_on: timeout
+          command: yarn server:test
 
   client:
     runs-on: ubuntu-latest

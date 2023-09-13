@@ -1,5 +1,4 @@
 import { getFormattedVault } from "../utils/getFormattedVault";
-import { capitalize } from "../utils/capitalize";
 
 const VaultList = ({
   vaults,
@@ -65,6 +64,7 @@ const VaultList = ({
       debtAmountDisplay,
       collateralizationRatio,
       oraclePrice,
+      vaultStatus,
     } = formattedVault;
     const govParams = managerGovParams[`manager${vault.managerId}`];
 
@@ -74,7 +74,7 @@ const VaultList = ({
           {vault.vaultId}
         </td>
         {[
-          capitalize(vault?.vaultState),
+          vaultStatus,
           collateralBrand,
           collateralAmountDisplay,
           oraclePrice,
@@ -89,7 +89,7 @@ const VaultList = ({
             {value}
           </td>
         ))}
-        {[govParams.collateralRatio, govParams.liquidationRatio].map(
+        {[govParams.minimumCollateralRatio, govParams.liquidationRatio].map(
           (value, idx) => (
             <th
               key={`${value}-${idx}`}
