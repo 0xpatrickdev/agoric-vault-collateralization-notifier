@@ -81,14 +81,14 @@ test("notifier user input sanitization", async (t) => {
     collateralizationRatio: 250,
   };
 
-  const test = async (params, error) => {
+  const testScenario = async (params, error) => {
     const response = await t.context.app.inject({
       method: "POST",
       url: "notifiers",
       body: Object.assign({}, defaultArgs, params),
       headers: t.context.headers,
     });
-    t.is(response.statusCode, 400);
+    t.is(response.statusCode, 400, error);
     t.deepEqual(await response.json(), { message: error }, error);
   };
 
@@ -103,11 +103,15 @@ test("notifier user input sanitization", async (t) => {
       { collateralizationRatio: -5 },
       "Collateralization Ratio must be a positive integer",
     ],
+    [
+      { collateralizationRatio: 220.5 },
+      "Collateralization Ratio must be a positive integer",
+    ],
     [{ vaultManager: 0, vaultId: 9999999999 }, "Vault does not exist"],
     [{ vaultManager: 0, vaultId: 3 }, "Vault is inactive"],
   ];
 
-  await Promise.all(testCases.map((x) => test(...x)));
+  await Promise.all(testCases.map((x) => testScenario(...x)));
 });
 
 test("unauthorized user cannot create notifiers", async (t) => {
