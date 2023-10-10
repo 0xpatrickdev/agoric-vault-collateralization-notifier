@@ -19,7 +19,10 @@ import {
 import { vstorageWatcher } from "../vstorageWatcher.js";
 import { abciQuery } from "../services/rpc.js";
 
-/** @returns {import('fastify').FastifyPluginCallback} */
+/** @typedef {{ vaultManagerId: number, vaultId: number, collateralizationRatio: number }} CreateNotifierRequestBody */
+/** @typedef {{ notifierId: number }} DeleteRequestParams */
+
+/** @type {import('fastify').FastifyPluginCallback} */
 export const notifiers = (fastify, _, done) => {
   fastify.addHook("onRequest", async (request, reply) => {
     try {
@@ -31,9 +34,18 @@ export const notifiers = (fastify, _, done) => {
     }
   });
 
+  /**
+   * Route to create a new Notifier
+   * @param {import('fastify').FastifyRequest<{Body: CreateNotifierRequestBody}>} request
+   * @param {import('fastify').FastifyReply} reply
+   * @returns {Promise<void>}
+   */
   fastify.post("/notifiers", async (request, reply) => {
-    const { userId } = request.user;
-    const { vaultManagerId, vaultId, collateralizationRatio } = request.body;
+    const { userId } = /** @type {import('./auth.js').JwtUserPayload} */ (
+      request.user
+    );
+    const { vaultManagerId, vaultId, collateralizationRatio } =
+      /** @type {CreateNotifierRequestBody} */ (request.body);
     try {
       if (!isNaturalNumber(vaultManagerId))
         return reply
@@ -108,8 +120,16 @@ export const notifiers = (fastify, _, done) => {
     }
   });
 
+  /**
+   * Returns a list of notifiers for an authenticated user
+   * @param {import('fastify').FastifyRequest} request
+   * @param {import('fastify').FastifyReply} reply
+   * @returns {Promise<void>}
+   */
   fastify.get("/notifiers", async (request, reply) => {
-    const { userId } = request.user;
+    const { userId } = /** @type {import('./auth.js').JwtUserPayload} */ (
+      request.user
+    );
     let notifiers;
     try {
       notifiers = await getNotifiersByUser(userId);
@@ -120,9 +140,17 @@ export const notifiers = (fastify, _, done) => {
     return notifiers;
   });
 
+  /**
+   * Route to delete a new Notifier
+   * @param {import('fastify').FastifyRequest<{Params: DeleteRequestParams}>} request
+   * @param {import('fastify').FastifyReply} reply
+   * @returns {Promise<void>}
+   */
   fastify.delete("/notifiers/:notifierId", async (request, reply) => {
-    const { userId } = request.user;
-    const { notifierId } = request.params;
+    const { userId } = /** @type {import('./auth.js').JwtUserPayload} */ (
+      request.user
+    );
+    const { notifierId } = /** @type {DeleteRequestParams} */ (request.params);
     try {
       const res = await deleteNotifier({ userId, notifierId });
       // query if it's the last notifier for the vault. If yes, remove watcher

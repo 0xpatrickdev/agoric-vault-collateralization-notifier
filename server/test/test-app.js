@@ -17,7 +17,8 @@ test.beforeEach(async (t) => {
   });
   resetDb();
   t.context.app = makeApp({ logger: false });
-  t.context.db = await setupDb(initDb());
+  initDb();
+  t.context.db = await setupDb();
   t.context.vstorage = await initVstorageWatcher();
 });
 

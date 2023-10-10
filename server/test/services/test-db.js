@@ -44,7 +44,8 @@ test.beforeEach(async (t) => {
   });
   resetDb();
   t.context.app = makeApp();
-  t.context.db = await setupDb(initDb());
+  initDb();
+  t.context.db = await setupDb();
 });
 
 test.afterEach.always(async (t) => {
@@ -102,6 +103,7 @@ test("markUserVerified marks the user verified and removes token", async (t) => 
 
   await addOrUpdateUser(user);
   const dbUser0 = await getUserByToken(user.token);
+  t.truthy(dbUser0.id)
   t.is(dbUser0.verified, 0, "user should not be verified yet");
   t.is(dbUser0.token, user.token, "user should have an access token");
   t.is(
@@ -158,5 +160,5 @@ test("getLatestQuote returns the lastest quote", async (t) => {
 });
 
 test("getNotifiersByUser should return an empty array when notifiers are not found", async (t) => {
-  t.deepEqual(await getNotifiersByUser(), []);
+  t.deepEqual(await getNotifiersByUser(-10), []);
 });

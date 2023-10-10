@@ -1,8 +1,8 @@
 import { db } from "./index.js";
 
 /**
- * @param {import('../../types').Notifier} notifier - The notifier to create.
- * @returns {Promise<import('../../types').Notifier|Error>} - The created notifier.
+ * @param {Omit<import('../../types.js').Notifier, "id"| "active" | "expired">} notifier - The notifier to create.
+ * @returns {Promise<import('../../types.js').Notifier|Error>} - The created notifier.
  */
 export async function createNotifier(notifier) {
   return new Promise((resolve, reject) => {
@@ -30,9 +30,10 @@ export async function createNotifier(notifier) {
 
 /**
  * checks if user owns Notifier then deletes it
- * @param {string} notifierId id of notifier to delete
- * @param {string} userId user's id
- * @returns {Promise<{success: boolean, vaultId: number, vaultManagerId: number}|Error>} user
+ * @param {object} args
+ * @param {number} args.notifierId id of notifier to delete
+ * @param {number} args.userId user's id
+ * @returns {Promise<{success: boolean, vaultId: number, vaultManagerId: number}>}
  */
 export async function deleteNotifier({ notifierId, userId }) {
   return new Promise((resolve, reject) => {
@@ -61,7 +62,8 @@ export async function deleteNotifier({ notifierId, userId }) {
 
 /**
  * list of all notifiers for a user
- * @returns {Promise<Array<import('../../types').Notifier>} Array of notifiers
+ * @param {number} userId
+ * @returns {Promise<Array<import('../../types.js').Notifier>>} Array of notifiers
  */
 export async function getNotifiersByUser(userId) {
   return new Promise((resolve, reject) => {
@@ -73,6 +75,8 @@ export async function getNotifiersByUser(userId) {
   });
 }
 
+/** @typedef {import('../../types.js').Notifier & { email: string, brand: string }} NotifierWithUserData */
+
 /**
  * Finds all unsent notifiers for a vaultId-vaultManagerId pair below a certain collateralization ratio
  * and includes the email for the relevant user and the outIssuerName from the related Quote.
@@ -81,7 +85,7 @@ export async function getNotifiersByUser(userId) {
  * @param {number} opts.collateralizationRatio - Collateralization ratio
  * @param {number} opts.vaultId - Vault's id
  * @param {number} opts.vaultManagerId - Vault manager's id
- * @returns {Promise<Array<import('../../types').NotifierWithUserInfo>>} - Notifiers that meet the criteria with user email and outIssuerName.
+ * @returns {Promise<NotifierWithUserData[]>} - Notifiers that meet the criteria with user email and outIssuerName.
  */
 export async function getNotifiersByThreshold({
   collateralizationRatio,
@@ -119,7 +123,7 @@ export async function getNotifiersByThreshold({
  * @param {number} opts.collateralizationRatio collateralization ratio
  * @param {number} opts.vaultId vault's id
  * @param {number} opts.vaultManagerId vault manager's id
- * @returns {Promise<Array<import('../../types').Notifier>>} Notifiers that meet the criteria
+ * @returns {Promise<Array<import('../../types.js').Notifier>>} Notifiers that meet the criteria
  */
 export async function getNotifiersToReset({
   collateralizationRatio,
@@ -128,7 +132,15 @@ export async function getNotifiersToReset({
 }) {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT * FROM Notifiers WHERE active = 1 AND expired = 0 AND collateralizationRatio < ? AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
+      `
+      SELECT * FROM Notifiers
+      WHERE active = 1
+        AND expired = 0
+        AND collateralizationRatio < ?
+        AND vaultId = ?
+        AND vaultManagerId = ?
+      ORDER BY collateralizationRatio ASC
+      `,
       [collateralizationRatio, vaultId, vaultManagerId],
       (err, rows) => {
         if (err) return reject(err);
@@ -143,12 +155,18 @@ export async function getNotifiersToReset({
  * @param {object} opts
  * @param {number} opts.vaultId vault's id
  * @param {number} opts.vaultManagerId vault manager's id
- * @returns {Promise<Array<import('../../types').Notifier>>} Notifiers that meet the criteria
+ * @returns {Promise<Array<import('../../types.js').Notifier>>} Notifiers that meet the criteria
  */
 export async function getNotifiersByVaultId({ vaultId, vaultManagerId }) {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT * FROM Notifiers WHERE expired = 0 AND vaultId = ? AND vaultManagerId = ? ORDER BY collateralizationRatio ASC",
+      `
+      SELECT * FROM Notifiers
+      WHERE expired = 0
+        AND vaultId = ?
+        AND vaultManagerId = ?
+      ORDER BY collateralizationRatio ASC
+      `,
       [vaultId, vaultManagerId],
       (err, rows) => {
         if (err) return reject(err);

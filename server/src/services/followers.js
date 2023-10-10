@@ -24,7 +24,7 @@ import { sendEmail } from "../services/email.js";
 /**
  * Logic to handle notifications based on collateralization ratio.
  * @param {number} currentCollateralizationRatio - The calculated collateralization ratio.
- * @param {number} managerId - The manager ID for context.
+ * @param {number} vaultManagerId - The manager ID for context.
  * @param {number} vaultId - The vault ID for context.
  * @returns {Promise<void>}
  */
@@ -182,8 +182,8 @@ export async function handleVbankAssets(_path, value) {
 }
 
 /**
- * @param {import('../types').Vault['vaultManagerId']} vaultMangerId
- * @param {import('../types').Vault['vaultId']} vaultId
+ * @param {import('../types.js').Vault['vaultManagerId']} vaultManagerId
+ * @param {import('../types.js').Vault['vaultId']} vaultId
  * @returns {Promise<void>}
  */
 export async function stopWatchingVault(vaultManagerId, vaultId) {

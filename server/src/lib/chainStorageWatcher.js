@@ -18,15 +18,20 @@ const makePathSubscriber = (onUpdate, onError) => ({
 });
 
 /**
+ * @callback onErrorCallback
+ * @param {Error} error
+ */
+
+/**
  * Periodically queries the most recent data from chain storage, batching RPC
  * requests for efficiency.
  * @param {string} rpcAddr RPC server URL
  * @param {string} chainId the chain id to use
- * @param {import('@endo/marshal'.FromCapData)} unmarshal unserializer to use
- * @param onError
- * @param newPathQueryDelayMs
- * @param refreshLowerBoundMs
- * @param refreshUpperBoundMs
+ * @param {import('@endo/marshal').FromCapData<string>} unmarshal unserializer to use
+ * @param {onErrorCallback} [onError]
+ * @param {number} [newPathQueryDelayMs]
+ * @param {number} [refreshLowerBoundMs]
+ * @param {number} [refreshUpperBoundMs]
  */
 export const makeAgoricChainStorageWatcher = (
   rpcAddr,
@@ -140,7 +145,7 @@ export const makeAgoricChainStorageWatcher = (
 
   /**
    *
-   * @param {[import('../types').AgoricChainStoragePathKind, string][]} path
+   * @param {[import('./batchQuery.js').AgoricChainStoragePathKind, string]} path
    * @param {(latestValue: T) => void} onUpdate
    * @param {(log: string) => void} onPathError
    * @returns

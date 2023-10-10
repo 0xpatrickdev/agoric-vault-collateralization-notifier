@@ -1,8 +1,9 @@
 import { db } from "./index.js";
 
 /**
- * @param {import('../types').User} user
- * @returns {Promise<number|Error>} number of rows inserted or updated
+ * @param {Omit<import('../../types.js').User, 'id'>} user
+ * @returns {Promise<number>} number of rows inserted or updated
+ * @throws error if user not found
  */
 export async function addOrUpdateUser({ email, token, tokenExpiry, verified }) {
   return new Promise((resolve, reject) => {
@@ -22,8 +23,9 @@ export async function addOrUpdateUser({ email, token, tokenExpiry, verified }) {
 }
 
 /**
- * @param {import('../types').User.token} token access token
- * @returns {Promise<import('../types').User|Error>} user
+ * @param {import('../../types.js').User['token']} token access token
+ * @returns {Promise<import('../../types.js').User>} user
+ * @throws error if user not found
  */
 export async function getUserByToken(token) {
   return new Promise((resolve, reject) => {
@@ -35,8 +37,9 @@ export async function getUserByToken(token) {
 }
 
 /**
- * @param {import('../types').User.id} id userId
- * @returns {Promise<import('../types').User|Error>} user
+ * @param {import('../../types.js').User['id']} id userId
+ * @returns {Promise<import('../../types.js').User>} user
+ * @throws error if user not found
  */
 export async function getUserById(id) {
   return new Promise((resolve, reject) => {
@@ -49,8 +52,9 @@ export async function getUserById(id) {
 
 /**
  * marks user as verified and removes token, tokenExpiry
- * @param {import('../types').User.id} id userId
- * @returns {Promise<object|Error>} user
+ * @param {import('../../types.js').User['id']} id userId
+ * @returns {Promise<void>} user
+ * @throws error if user not found
  */
 export async function markUserVerified(id) {
   return new Promise((resolve, reject) => {
@@ -67,7 +71,8 @@ export async function markUserVerified(id) {
 
 /**
  * @param {string} userId user's id
- * @returns {Promise<import('../types').Notifier[]|Error>} list of a user's notifiers
+ * @returns {Promise<import('../../types.js').Notifier[]>} list of a user's notifiers
+ * @throws error if user not found
  */
 export async function getNotifersByUser(userId) {
   return new Promise((resolve, reject) => {

@@ -1,19 +1,19 @@
 /* c8 ignore start */
-/** @type {import('../types').AgoricChainStoragePathKind} */
+/** @enum {string} */
 export const AgoricChainStoragePathKind = {
   Children: "children",
   Data: "data",
 };
 
 /**
- * @param {[import('../types').AgoricChainStoragePathKind, string][]} path
+ * @param {[AgoricChainStoragePathKind, string]} path
  * @returns {string} key
  */
 export const pathToKey = (path) => path.join(".");
 
 /**
  * @param {string} key
- * @returns {[import('../types').AgoricChainStoragePathKind, string][]}
+ * @returns {[AgoricChainStoragePathKind, string]}
  */
 export const keyToPath = (key) => {
   const parts = key.split(".");
@@ -22,8 +22,8 @@ export const keyToPath = (key) => {
 
 /**
  * @param {string} node
- * @param {import('@endo/marshall').FromCapData<string>} unmarshal
- * @param {[import('../types').AgoricChainStoragePathKind, string][]} paths
+ * @param {import('@endo/marshal').FromCapData<string>} unmarshal
+ * @param {[AgoricChainStoragePathKind, string][]} paths
  * @returns
  */
 export const batchVstorageQuery = (node, unmarshal, paths) => {

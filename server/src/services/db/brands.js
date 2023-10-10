@@ -6,7 +6,7 @@ import { db } from "./index.js";
  * @param {string} brandData.issuerName - The name of the brand
  * @param {string} brandData.assetKind - The kind of asset (e.g., 'fungible', 'non-fungible')
  * @param {number} brandData.decimalPlaces - The number of decimal places for the asset
- * @param {number} brandData.brand - String of ERTP brand object
+ * @param {string} brandData.brand - String of ERTP brand object
  * @returns {Promise<void>}
  */
 export async function insertOrReplaceBrand(brandData) {
@@ -30,7 +30,7 @@ export async function insertOrReplaceBrand(brandData) {
 /**
  * Retrieve an issuerName from a brand
  * @param {string} brand
- * @returns {Promise<boolean>}
+ * @returns {Promise<import('../../types.js').IssuerName|undefined>}
  */
 export function getIssuerNameFromBrand(brand) {
   return new Promise((resolve, reject) => {

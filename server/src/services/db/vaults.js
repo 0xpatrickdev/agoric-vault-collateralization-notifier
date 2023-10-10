@@ -2,7 +2,7 @@ import { db } from "./index.js";
 
 /**
  * list of unique vaultManagerIds (collateralTypes)
- * @returns {Promise<Array<import('../types').Notifier>} Array of unique vaultManagerIds
+ * @returns {Promise<import('../../types.js').Notifier['vaultManagerId'][]>} Array of unique vaultManagerIds
  */
 export async function getUniqueVaultManagerIds() {
   return new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ export function checkVaultExists(managerId, vaultId) {
 /**
  * Return a list of vaults for a particular asset (managerId)
  * @param {number} managerId - The manager ID.
- * @returns {Promise<Array<import('../../types').Vault>}
+ * @returns {Promise<import('../../types.js').Vault[]>}
  */
 export function getAllVaultsByManagerId(managerId) {
   return new Promise((resolve, reject) => {
