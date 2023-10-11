@@ -2,10 +2,11 @@ import axios from "axios";
 import { getEnvVars } from "../utils/getEnvVar.js";
 
 /**
- * @param {string} email email of user
- * @param {string} subject subject line of the email
- * @param {string} [text] body of the email
- * @param {string} [html] body of the email
+ * @param {object} args
+ * @param {string} args.email email of user
+ * @param {string} args.subject subject line of the email
+ * @param {string} [args.text] body of the email
+ * @param {string} [args.html] body of the email
  * @returns {Promise<{id: string, message: string}>}
  */
 export async function sendEmail({ email, subject, text, html }) {

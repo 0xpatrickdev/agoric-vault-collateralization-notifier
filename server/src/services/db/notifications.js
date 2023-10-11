@@ -1,8 +1,8 @@
 import { db } from "./index.js";
 
 /**
- * @param {import('../../types').Notification} notification - The notification to create.
- * @returns {Promise<import('../../types').Notification|Error>} - The created notifier.
+ * @param {import('../../types.js').Notification} notification - The notification to create.
+ * @returns {Promise<import('../../types.js').Notification>} - The created notifier.
  */
 export async function createNotification(notification) {
   return new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ export async function createNotification(notification) {
  * Get a list of notifiers by userId, ordered by sentAt (most recent first).
  *
  * @param {number} userId - The ID of the user to fetch notifiers for.
- * @returns {Promise<import('../../types').Notification[]|Error>} - An array of notifications for the user.
+ * @returns {Promise<import('../../types.js').Notification[]>} - An array of notifications for the user.
  */
 export async function getNotificationsByUserId(userId) {
   return new Promise((resolve, reject) => {

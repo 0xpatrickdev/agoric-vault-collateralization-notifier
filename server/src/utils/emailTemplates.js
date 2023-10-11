@@ -9,8 +9,17 @@ export const getVerifyEmailTemplate = (token) => {
   };
 };
 
-/** @param {string} text email message */
-export const getNotificationTemplate = ({ brand, vaultId, collateralizationRatio }) => ({
-    subject: "Inter Vault Alert: Collateralization Level Breached",
-    text: `Your ${brand} vault #${vaultId}, has crossed below the ${collateralizationRatio}% collateralization level.`
-  });
+/**
+ * @param {object} arguments
+ * @param {string} arguments.brand
+ * @param {number} arguments.vaultId
+ * @param {number} arguments.collateralizationRatio
+ */
+export const getNotificationTemplate = ({
+  brand,
+  vaultId,
+  collateralizationRatio,
+}) => ({
+  subject: "Inter Vault Alert: Collateralization Level Breached",
+  text: `Your ${brand} vault #${vaultId}, has crossed below the ${collateralizationRatio}% collateralization level.`,
+});

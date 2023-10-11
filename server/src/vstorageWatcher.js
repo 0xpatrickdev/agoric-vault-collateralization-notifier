@@ -15,6 +15,7 @@ import {
   handleVbankAssets,
 } from "./services/followers.js";
 
+/** @type {import('./services/rpc.js').VstorageWatcher} */
 let vstorageWatcher;
 
 /** @returns {Promise<import('./services/rpc.js').VstorageWatcher>} */
@@ -29,8 +30,11 @@ export async function initVstorageWatcher() {
   if (vaultIds.length)
     console.info(`Found ${vaultIds.length} vaults from db to follow.`);
 
+  /** @type {import('./services/rpc.js').PathHandlerPair[]} */
   const brands = [[makeVbankAssetPath(), "vbank"]];
+  /** @type {import('./services/rpc.js').PathHandlerPair[]} */
   const quotes = managerIds.map((id) => [makeQuotePath(id), "quote"]);
+  /** @type {import('./services/rpc.js').PathHandlerPair[]} */
   const vaults = vaultIds.map((ids) => [makeVaultPath(...ids), "vault"]);
 
   vstorageWatcher = await makeVstorageWatcher(brands, {

@@ -10,14 +10,23 @@ import { THIRTY_MINUTES_IN_MS } from "../utils/constants.js";
 import { getEnvVar } from "../utils/getEnvVar.js";
 import { getVerifyEmailTemplate } from "../utils/emailTemplates.js";
 
+/** @typedef {{ email: string }} RegisterRequestBody */
+/** @typedef {{ token: string }} VerifyRequestBody */
+/** @typedef {{ userId: number, email: string }} JwtUserPayload */
+
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "30d";
 
-/** @returns {import('fastify').FastifyPluginCallback} */
+/** @type {import('fastify').FastifyPluginCallback} */
 export const auth = (fastify, _, done) => {
-  // Route to create a new user
+  /**
+   * Route to create a new user
+   * @param {import('fastify').FastifyRequest<{Body: RegisterRequestBody}>} request
+   * @param {import('fastify').FastifyReply} reply
+   * @returns {Promise<void>}
+   */
   fastify.post("/register", async (request, reply) => {
     // validate email
-    const { email } = request.body;
+    const { email } = /** @type {RegisterRequestBody} */ (request.body);
     if (!isValidEmail(email)) {
       return reply.status(400).send({ message: "Email address is invalid." });
     }
@@ -46,9 +55,14 @@ export const auth = (fastify, _, done) => {
     });
   });
 
-  // Route to verify a user and log them in
+  /**
+   * Route to verify a user and log them in
+   * @param {import('fastify').FastifyRequest<{Body: VerifyRequestBody}>} request
+   * @param {import('fastify').FastifyReply} reply
+   * @returns {Promise<void>}
+   */
   fastify.post("/verify", async (request, reply) => {
-    const { token } = request.body;
+    const { token } = /** @type {VerifyRequestBody} */ (request.body);
     let user;
     try {
       user = await getUserByToken(token);
@@ -77,7 +91,7 @@ export const auth = (fastify, _, done) => {
 
     // Generate a JWT and send success message
     const jwt = fastify.jwt.sign(
-      { email: user.email, userId: user.id },
+      /** @type {JwtUserPayload} */ ({ email: user.email, userId: user.id }),
       { expiresIn: JWT_EXPIRY }
     );
 
@@ -85,7 +99,7 @@ export const auth = (fastify, _, done) => {
       .setCookie(getEnvVar("JWT_COOKIE_NAME"), jwt, {
         secure: true,
         httpOnly: true,
-        sameSite: "Strict",
+        sameSite: "strict",
         path: "/",
       })
       .send({ ok: true });

@@ -1,8 +1,10 @@
 import { db } from "./index.js";
 
+/** @typedef {[import('../../types.js').Vault['vaultManagerId'], import('../../types.js').Vault['vaultId']]} VaultIdPair */
+
 /**
  * list of unique [vaultManager, vaultId] pairs
- * @returns {Promise<[import('../../types').Vault['vaultManagerId'], import('../../types').Vault['vaultId']]>} Array of unique pairs of vaultManagerId and vaultId
+ * @returns {Promise<VaultIdPair[]>} Array of unique pairs of vaultManagerId and vaultId
  */
 export async function getUniqueVaultManagerAndVaultIds() {
   return new Promise((resolve, reject) => {
@@ -22,8 +24,8 @@ export async function getUniqueVaultManagerAndVaultIds() {
  * @param {number} quoteData.vaultManagerId - The vault manager ID (e.g., 0)
  * @param {number} quoteData.quoteAmountIn - The amount in
  * @param {number} quoteData.quoteAmountOut - The amount out
- * @param {string} quoteData.inIssuerName - The amount out
- * @param {string} quoteData.outIssuerName - The amount out
+ * @param {import('../../types.js').IssuerName} quoteData.inIssuerName - The amount out
+ * @param {import('../../types.js').IssuerName} quoteData.outIssuerName - The amount out
  * @returns {Promise<void>}
  */
 export async function insertOrReplaceQuote(quoteData) {
@@ -50,7 +52,7 @@ export async function insertOrReplaceQuote(quoteData) {
 /**
  * Retrieve the latest quote for a given manager.
  * @param {number} managerId - The manager ID.
- * @returns {Promise<{ amountIn: number, amountOut: number, amountInDecimals: number, amountOutDecimals: number }>} The latest quote.
+ * @returns {Promise<import('../../types.js').Quote & { amountInDecimals: number, amountOutDecimals: number }>} The latest quote.
  */
 export function getLatestQuote(managerId) {
   return new Promise((resolve, reject) => {
@@ -99,7 +101,7 @@ export function checkQuoteExists(managerId) {
  * @param {number} opts.vaultManagerId - The vault manager ID (e.g., 0)
  * @param {number} opts.quoteAmountIn
  * @param {number} opts.quoteAmountOut
- * @returns {Promise<{ amountIn: number, amountOut: number, amountInDecimals: number, amountOutDecimals: number }>}
+ * @returns {Promise<import('../../types.js').Quote & { amountInDecimals: number, amountOutDecimals: number }>}
  */
 export async function updateQuote({
   vaultManagerId,

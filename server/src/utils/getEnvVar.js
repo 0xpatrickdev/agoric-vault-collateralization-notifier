@@ -1,6 +1,6 @@
 /**
- * @param {import('../types').ProcessEnv} key environment variable key (process.env[key])
- * @returns {unknown}
+ * @param {import('../types.js').ProcessEnvKey} key environment variable key (process.env[key])
+ * @returns {string}
  * @throws {Error} if environment variable is not present
  */
 export const getEnvVar = (key) => {
@@ -10,12 +10,12 @@ export const getEnvVar = (key) => {
 };
 
 /**
- * @param {import('../types').ProcessEnv[]} keys environment variable keys (process.env[key])
- * @returns {unknown[]}
+ * @param {import('../types.js').ProcessEnvKey[]} keys environment variable keys (process.env[key])
+ * @returns {string[]}
  * @throws {Error} if environment variable is not present
  */
-export const getEnvVars = (keys) => 
+export const getEnvVars = (keys) =>
   keys.reduce((acc, curr, i) => {
     acc[i] = getEnvVar(curr);
     return acc;
-  }, []);
+  }, /** @type {string[]} */ ([]));

@@ -20,13 +20,14 @@ export const getNetworkConfig = async () => {
   return { rpc: networkConfig.rpcAddrs[0], chainName: networkConfig.chainName };
 };
 
-
+/** @param {{ body: string }} data */
 function tryUnmarshal(data) {
   let unmarshalled;
   try {
     unmarshalled = importContext.fromBoard.fromCapData(data);
   } catch (e) {
     // workaround, as unmarshal throws an error "bad board slot null" for quotes query
+    /** @param {{ body: string }} value */
     const _unserialize = (value) => {
       return JSON.parse(value.body.slice(1));
     };
@@ -36,9 +37,10 @@ function tryUnmarshal(data) {
 }
 
 /**
+ * @template T
  * @param {string} path
  * @param {AgoricChainStoragePathKind} [type] default to data
- * @param {boolean} [type] default to data
+ * @returns {Promise<T>}
  */
 export const abciQuery = async (
   path,
@@ -63,14 +65,13 @@ export const abciQuery = async (
     );
     const { values } = JSON.parse(data.value);
     const parsed = tryUnmarshal(JSON.parse(values[values.length - 1]));
-    return parsed;
+    return /** @type {T} */ (parsed);
   } catch (e) {
     throw new Error(e);
   }
 };
 
-
-export const getBatchQueryWatcher = async () => {
+export const makeBatchQueryWatcher = async () => {
   const { rpc, chainName } = await getNetworkConfig();
   const watcher = makeAgoricChainStorageWatcher(
     rpc,
@@ -87,21 +88,22 @@ export const getBatchQueryWatcher = async () => {
  * @returns {void}
  */
 
-/**
- * @typedef {('vault'|'quote'|'vbank')} HandlerType
- */
+/** @typedef {('vault'|'quote'|'vbank')} HandlerType */
+
+/** @typedef {[path: string, HandlerType]} PathHandlerPair */
 
 /**
  * @typedef {Object} VstorageWatcher
- * @property {(path: string, HandlerType) => void} watchPath - new path to watch
- * @property {(paths: [path: string, HandlerType][]) => void} watchPaths - list of new paths to watch with their handler keys
+ * @property {(path: string, handler: HandlerType) => void} watchPath - new path to watch
+ * @property {(paths: PathHandlerPair[]) => void} watchPaths - list of new paths to watch with their handler keys
  * @property {(path: string) => void} removePath - path to stop watching
+ * @property {() => string[]} getPaths - list of actively watched vstorage paths
  */
 
 /**
  * @param {[path: string, HandlerType][]} initialPaths list of paths to watch along with their handler keys
- * @param {Object<HandlerType, UpdateHandler>} handlers - An object containing handlers for different quote types
- * @param {(path, e) => void} [errorHandler] callback function rpc path error
+ * @param {Record<HandlerType, UpdateHandler>} handlers - An object containing handlers for different quote types
+ * @param {(path: string, e: string) => void} [errorHandler] callback function rpc path error
  * @returns {Promise<VstorageWatcher>}
  */
 export const makeVstorageWatcher = async (
@@ -110,8 +112,11 @@ export const makeVstorageWatcher = async (
   errorHandler
 ) => {
   let subscriptions = new Map();
-  const chainStorageWatcher = await getBatchQueryWatcher();
+  const chainStorageWatcher = await makeBatchQueryWatcher();
 
+  /**
+   * @param {string} path
+   * @param {string} e */
   const _errorHandler = (path, e) => {
     if (errorHandler && typeof errorHandler === "function") {
       return errorHandler(path, e);
@@ -121,7 +126,7 @@ export const makeVstorageWatcher = async (
 
   /**
    * @param {string} path
-   * @param {HandlerType} */
+   * @param {HandlerType} type */
   const watchPath = (path, type) => {
     if (subscriptions.has(path)) return;
     if (!handlers[type]) return console.error("Handler not found for", type);
@@ -145,6 +150,6 @@ export const makeVstorageWatcher = async (
       if (subscriptions.has(path)) subscriptions.delete(path);
       // @todo do we need explicitly tell chainStorageWatcher to stop watching?
     },
-    getPaths: () => subscriptions.keys(),
+    getPaths: () => [...subscriptions.keys()],
   };
 };

@@ -25,7 +25,8 @@ test.beforeEach(async (t) => {
   t.context.getStub = sinon.stub(axios, "get").resolves(resp);
   resetDb();
   t.context.app = makeApp({ logger: false });
-  t.context.db = await setupDb(initDb());
+  initDb();
+  t.context.db = await setupDb();
   t.context.vstorage = await initVstorageWatcher();
   // @todo: doesn't work with SES (cannot assign readonly property .toUTCString ...)
   // t.context.clock = sinon.useFakeTimers({

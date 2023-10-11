@@ -3,7 +3,7 @@ import path from "path";
 import sqlite from "sqlite3";
 import { getEnvVar } from "../../utils/getEnvVar.js";
 
-/** @type {import('sqlite3').Database|undefined} */
+/** @type {import('sqlite3').Database} */
 let db;
 
 /** @returns {import('sqlite3').Database} */
@@ -32,7 +32,6 @@ export const resetDb = () => {
 
 /**
  * creates Users and Notifer tables if they do not exist
- * @param {import('sqlite3').Database} db - The SQLite database connection.
  * @returns {Promise<import('sqlite3').Database>} - A promise that resolves when the database has been set up.
  */
 export const setupDb = async () => {
@@ -111,7 +110,6 @@ export const setupDb = async () => {
 };
 
 /**
- * @param {import('sqlite3').Database} db - The SQLite database connection.
  * @returns {Promise<void>} - A promise that resolves when the database has been torn down.
  */
 export async function teardownDb() {
