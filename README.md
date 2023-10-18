@@ -44,6 +44,7 @@ https://github.com/0xpatrickdev/agoric-vault-collateralization-notifier/assets/1
 
 - Node 18.x (native fetch!)
 - yarn 1.22.x
+- API_KEY and DOMAIN_NAME from [Mailgun](https://www.mailgun.com/)
 
 ```zsh
 git clone https://github.com/0xpatrickdev/agoric-vault-collateralization-notifier.git
@@ -53,7 +54,8 @@ cd agoric-vault-collateralization-notifier
 yarn install
 
 # set environment variables
-cp .env.test .env
+# Remember to update .env file with your own API_KEY and DOMAIN_NAME
+cp server/.env.test server/.env
 
 # start fastify server + db
 yarn server:start
